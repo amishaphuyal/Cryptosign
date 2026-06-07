@@ -1,0 +1,41 @@
+# Virtual environments
+venv/
+.venv/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Environment variables
+.env
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Keys, keystores and certificates
+*.pem
+*.key
+*.p12
+storage/encrypted/
+storage/keystores/
+storage/certs/
+storage/signatures/
+backups/
+
+# Other
+*.nonce
