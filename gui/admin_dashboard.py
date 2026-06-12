@@ -2,6 +2,7 @@ import customtkinter as ctk
 from tkinter import messagebox, simpledialog
 import sys
 import os
+import shutil
 import sqlite3
 from datetime import datetime, timedelta  # ✅ timedelta pani add gara
 
@@ -888,6 +889,19 @@ class AdminDashboard:
             try:
                 if os.path.exists(file_path):
                     os.remove(file_path)
+
+                    # Clean up empty parent folder
+                    parent_dir = os.path.dirname(file_path)
+                    if os.path.exists(parent_dir) and not os.listdir(parent_dir):
+                        os.rmdir(parent_dir)
+                        print(f"✅ Removed empty folder: {parent_dir}")
+
+                        # Also check grandparent (user folder)
+                        grandparent = os.path.dirname(parent_dir)
+                        if os.path.exists(grandparent) and not os.listdir(grandparent):
+                            os.rmdir(grandparent)
+                            print(f"✅ Removed empty user folder: {grandparent}")
+
                 self.audit.delete_user_file("admin", file_path)
                 self.switch_view("docs")
             except Exception as e:
@@ -1004,12 +1018,54 @@ class AdminDashboard:
     
     def revoke_user(self, username):
         if messagebox.askyesno("Confirm", f"Revoke '{username}'?"):
+            # 1. Update user status in database
             conn = sqlite3.connect(self.auth.db_path)
             conn.execute("UPDATE users SET status = 'revoked' WHERE username = ?", (username,))
             conn.commit()
             conn.close()
+
+            # 2. Add to revocation list
             from core.revocation import revoke_user
             revoke_user(username)
+
+            # 3. Delete user's encrypted files and folder (cleanup)
+            user_enc_dir = f"storage/encrypted/{username}"
+            if os.path.exists(user_enc_dir):
+                try:
+                    shutil.rmtree(user_enc_dir)
+                    print(f"✅ Deleted encrypted folder: {user_enc_dir}")
+                except Exception as e:
+                    print(f"⚠️ Could not delete encrypted folder: {e}")
+
+            # 4. Delete user's signature files and folder (cleanup)
+            user_sig_dir = f"storage/signatures/{username}"
+            if os.path.exists(user_sig_dir):
+                try:
+                    shutil.rmtree(user_sig_dir)
+                    print(f"✅ Deleted signatures folder: {user_sig_dir}")
+                except Exception as e:
+                    print(f"⚠️ Could not delete signatures folder: {e}")
+
+            # 5. Delete user's key files
+            user_priv_key = f"storage/keystores/{username}_private.pem"
+            user_pub_key = f"storage/keystores/{username}_public.pem"
+            for key_file in [user_priv_key, user_pub_key]:
+                if os.path.exists(key_file):
+                    try:
+                        os.remove(key_file)
+                        print(f"✅ Deleted key: {key_file}")
+                    except Exception as e:
+                        print(f"⚠️ Could not delete key: {e}")
+
+            # 6. Delete user's certificate
+            user_cert = f"storage/certs/{username}_cert.pem"
+            if os.path.exists(user_cert):
+                try:
+                    os.remove(user_cert)
+                    print(f"✅ Deleted certificate: {user_cert}")
+                except Exception as e:
+                    print(f"⚠️ Could not delete certificate: {e}")
+
             self.audit.log(self.admin['username'], "ADMIN_REVOKE", "SUCCESS", details=f"Revoked: {username}")
             self.switch_view("users")
     
@@ -1032,10 +1088,62 @@ class AdminDashboard:
     
     def delete_user(self, username):
         if messagebox.askyesno("⚠️ DANGER", f"PERMANENTLY delete '{username}'?"):
+            # 1. Delete user from database
             conn = sqlite3.connect(self.auth.db_path)
             conn.execute("DELETE FROM users WHERE username = ?", (username,))
             conn.commit()
             conn.close()
+
+            # 2. Delete user's encrypted files and folder
+            user_enc_dir = f"storage/encrypted/{username}"
+            if os.path.exists(user_enc_dir):
+                try:
+                    shutil.rmtree(user_enc_dir)
+                    print(f"✅ Deleted encrypted folder: {user_enc_dir}")
+                except Exception as e:
+                    print(f"⚠️ Could not delete encrypted folder: {e}")
+
+            # 3. Delete user's signature files and folder
+            user_sig_dir = f"storage/signatures/{username}"
+            if os.path.exists(user_sig_dir):
+                try:
+                    shutil.rmtree(user_sig_dir)
+                    print(f"✅ Deleted signatures folder: {user_sig_dir}")
+                except Exception as e:
+                    print(f"⚠️ Could not delete signatures folder: {e}")
+
+            # 4. Delete user's key files
+            user_priv_key = f"storage/keystores/{username}_private.pem"
+            user_pub_key = f"storage/keystores/{username}_public.pem"
+            for key_file in [user_priv_key, user_pub_key]:
+                if os.path.exists(key_file):
+                    try:
+                        os.remove(key_file)
+                        print(f"✅ Deleted key: {key_file}")
+                    except Exception as e:
+                        print(f"⚠️ Could not delete key: {e}")
+
+            # 5. Delete user's certificate
+            user_cert = f"storage/certs/{username}_cert.pem"
+            if os.path.exists(user_cert):
+                try:
+                    os.remove(user_cert)
+                    print(f"✅ Deleted certificate: {user_cert}")
+                except Exception as e:
+                    print(f"⚠️ Could not delete certificate: {e}")
+
+            # 6. Clean up audit logs and file tracking for this user
+            try:
+                conn = sqlite3.connect("storage/audit.db")
+                conn.execute("DELETE FROM audit_log WHERE username = ?", (username,))
+                conn.execute("DELETE FROM user_files WHERE username = ?", (username,))
+                conn.execute("DELETE FROM user_activity WHERE username = ?", (username,))
+                conn.commit()
+                conn.close()
+                print(f"✅ Cleaned audit data for: {username}")
+            except Exception as e:
+                print(f"⚠️ Could not clean audit data: {e}")
+
             self.audit.log(self.admin['username'], "ADMIN_DELETE", "SUCCESS", details=f"Deleted: {username}")
             self.switch_view("users")
     

@@ -1,2 +1,0 @@
-ID,Timestamp,Username,Action,File,Hash,Result,Details,IP
-25,2026-06-03T21:09:39.775360,admin,ADMIN_CLEAR_LOGS,,,SUCCESS,All logs cleared,localhost

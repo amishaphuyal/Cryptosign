@@ -94,12 +94,46 @@ class UserDashboard:
                                         font=("Inter", 24, "bold"), text_color="#f8fafc")
         self.header_title.pack(side="left")
 
+        # ✅ REFRESH BUTTON
+        self.refresh_btn = ctk.CTkButton(self.header, text="🔄 Refresh", width=100, height=35,
+                     font=("Inter", 12), fg_color="#6366f1", hover_color="#4f46e5",
+                     text_color="white", corner_radius=8,
+                     command=self.refresh_current_view)
+        self.refresh_btn.pack(side="right", padx=5)
+
         ctk.CTkButton(self.header, text="🔔", width=40, height=40,
                      font=("Inter", 16), fg_color="#1e293b", hover_color="#334155",
                      text_color="#f59e0b", corner_radius=8).pack(side="right", padx=5)
 
-        self.content_frame = ctk.CTkFrame(self.main_content, fg_color="transparent")
-        self.content_frame.pack(fill="both", expand=True, padx=30, pady=10)
+        # ✅ SCROLLABLE CONTENT FRAME
+        self.content_scroll = ctk.CTkScrollableFrame(self.main_content, fg_color="transparent")
+        self.content_scroll.pack(fill="both", expand=True, padx=30, pady=10)
+
+        self.content_frame = ctk.CTkFrame(self.content_scroll, fg_color="transparent")
+        self.content_frame.pack(fill="both", expand=True)
+
+    def refresh_current_view(self):
+        self.refresh_btn.configure(text="⏳ Refreshing...")
+        self.root.update()
+        
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
+        
+        if self.current_view == "dashboard":
+            self.show_dashboard()
+        elif self.current_view == "documents":
+            self.show_documents()
+        elif self.current_view == "batch_sign":
+            self.show_batch_sign()
+        elif self.current_view == "activity":
+            self.show_activity()
+        elif self.current_view == "profile":
+            self.show_profile()
+        elif self.current_view == "settings":
+            self.show_settings()
+        
+        self.refresh_btn.configure(text="🔄 Refresh")
+        self.root.update()
 
     def switch_view(self, view):
         for v, btn in self.menu_buttons.items():
@@ -144,7 +178,7 @@ class UserDashboard:
         ctk.CTkLabel(welcome, text="Here's your document signing overview", 
                     font=("Inter", 12), text_color="#94a3b8").pack(anchor="w", padx=20, pady=(0, 15))
 
-        # Stats - FIXED: Include BATCH_SIGN in Signed count
+        # Stats
         stats_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
         stats_frame.pack(fill="x", pady=(0, 20))
 
@@ -159,7 +193,6 @@ class UserDashboard:
         except:
             stats = {}
 
-        # FIXED: BATCH_SIGN + SIGN = Total Signed
         signed_count = stats.get("SIGN", 0) + stats.get("BATCH_SIGN", 0)
         self.create_stat_card(stats_frame, "📝 Signed", str(signed_count), "#6366f1")
         self.create_stat_card(stats_frame, "✅ Verified", str(stats.get("VERIFY", 0)), "#10b981")
@@ -193,13 +226,13 @@ class UserDashboard:
 
         # Recent Activity
         activity_frame = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
-        activity_frame.pack(fill="both", expand=True)
+        activity_frame.pack(fill="x", pady=(0, 20))
 
         ctk.CTkLabel(activity_frame, text="📈 Recent Activity", 
                     font=("Inter", 16, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(15, 10))
 
-        scroll = ctk.CTkScrollableFrame(activity_frame, fg_color="transparent")
-        scroll.pack(fill="both", expand=True, padx=20, pady=(0, 15))
+        scroll = ctk.CTkScrollableFrame(activity_frame, fg_color="transparent", height=200)
+        scroll.pack(fill="x", padx=20, pady=(0, 15))
 
         try:
             conn = sqlite3.connect("storage/audit.db")
@@ -217,23 +250,16 @@ class UserDashboard:
             ctk.CTkLabel(scroll, text="No recent activity", 
                         font=("Inter", 12), text_color="#64748b").pack(pady=20)
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # ✅ BATCH SIGN - Full Working Implementation
-    # ═══════════════════════════════════════════════════════════════════════
     def show_batch_sign(self):
-        """Show Batch Sign interface with modern folder selection"""
         self.header_title.configure(text="📦 Batch Sign Documents")
 
-        # Check if keys exist
         if not os.path.exists(f"storage/keystores/{self.username}_private.pem"):
             self.show_setup_wizard()
             return
 
-        # Main container
         container = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
         container.pack(fill="both", expand=True, padx=20, pady=20)
 
-        # Title
         ctk.CTkLabel(container, text="📦 Batch Document Signing", 
                     font=("Inter", 24, "bold"), text_color="#f8fafc").pack(pady=(30, 10))
 
@@ -244,7 +270,6 @@ class UserDashboard:
         settings_frame = ctk.CTkFrame(container, fg_color="#0f172a", corner_radius=10)
         settings_frame.pack(fill="x", padx=40, pady=10)
 
-        # Signature Mode
         mode_frame = ctk.CTkFrame(settings_frame, fg_color="transparent")
         mode_frame.pack(fill="x", padx=20, pady=(15, 10))
 
@@ -263,7 +288,6 @@ class UserDashboard:
                           font=("Inter", 12), text_color="#f8fafc",
                           fg_color="#6366f1").pack(side="left", padx=10)
 
-        # File Types
         types_frame = ctk.CTkFrame(settings_frame, fg_color="transparent")
         types_frame.pack(fill="x", padx=20, pady=(0, 15))
 
@@ -288,7 +312,6 @@ class UserDashboard:
                        font=("Inter", 11), text_color="#94a3b8",
                        fg_color="#6366f1").pack(side="left", padx=8)
 
-        # Folder Selection - MODERN DIALOG STYLE
         folder_frame = ctk.CTkFrame(container, fg_color="transparent")
         folder_frame.pack(fill="x", padx=40, pady=15)
 
@@ -304,7 +327,6 @@ class UserDashboard:
                      hover_color="#4f46e5", corner_radius=8,
                      command=self.browse_batch_folder).pack(side="left")
 
-        # Progress Section
         self.progress_frame = ctk.CTkFrame(container, fg_color="transparent")
         self.progress_frame.pack(fill="x", padx=40, pady=10)
 
@@ -317,12 +339,10 @@ class UserDashboard:
         self.progress_bar.pack(pady=5)
         self.progress_bar.set(0)
 
-        # Result Label
         self.batch_result_label = ctk.CTkLabel(container, text="", 
                                                 font=("Inter", 14), text_color="#f8fafc")
         self.batch_result_label.pack(pady=10)
 
-        # Action Buttons
         btn_frame = ctk.CTkFrame(container, fg_color="transparent")
         btn_frame.pack(pady=20)
 
@@ -337,7 +357,6 @@ class UserDashboard:
                      command=self.reset_batch_sign).pack(side="left", padx=10)
 
     def browse_batch_folder(self):
-        """Browse for folder using modern file dialog style"""
         file = filedialog.askopenfilename(
             title="📁 Select Any File in Target Folder",
             filetypes=[("All Files", "*.*")],
@@ -356,14 +375,12 @@ class UserDashboard:
                 pass
 
     def reset_batch_sign(self):
-        """Reset batch sign form"""
         self.folder_path_var.set("")
         self.progress_bar.set(0)
         self.progress_label.configure(text="Ready to start")
         self.batch_result_label.configure(text="")
 
     def execute_batch_sign(self):
-        """Execute batch signing with progress updates"""
         folder_path = self.folder_path_var.get()
         
         if not folder_path:
@@ -374,7 +391,6 @@ class UserDashboard:
             messagebox.showerror("Error", "Selected folder does not exist!")
             return
 
-        # Build file types list
         extensions = []
         if self.pdf_var.get(): extensions.append('.pdf')
         if self.docx_var.get(): extensions.append('.docx')
@@ -387,7 +403,6 @@ class UserDashboard:
 
         mode = self.batch_mode.get()
 
-        # Disable buttons during processing
         self.progress_label.configure(text="Scanning folder...")
         self.progress_bar.set(0.1)
         self.root.update()
@@ -401,7 +416,6 @@ class UserDashboard:
             self.root.update()
 
         try:
-            # Call batch_sign from core/batch_sign.py
             results = batch_sign_folder(
                 username=self.username,
                 mode=mode,
@@ -415,7 +429,6 @@ class UserDashboard:
                 self.progress_label.configure(text="Cancelled")
                 return
 
-            # Update UI with results
             signed = results['signed']
             failed = results['failed']
             total = signed + failed
@@ -435,7 +448,6 @@ class UserDashboard:
                 self.audit.log(self.username, "BATCH_SIGN", "PARTIAL", 
                               details=f"Signed {signed}/{total}, Failed {failed}")
 
-            # Show errors if any
             if results['errors']:
                 error_text = "\n".join([f"{os.path.basename(f)}: {e}" for f, e in results['errors'][:5]])
                 if len(results['errors']) > 5:
@@ -449,7 +461,6 @@ class UserDashboard:
                 f"❌ Failed: {failed}\n"
                 f"📁 Folder: {folder_path}")
 
-            # Refresh dashboard
             self.show_dashboard()
 
         except Exception as e:
@@ -544,6 +555,9 @@ class UserDashboard:
         ctk.CTkLabel(frame, text=time[:10], 
                     font=("Inter", 10), text_color="#64748b").pack(side="right", padx=10)
 
+    # ═══════════════════════════════════════════════════════════════════════
+    # ✅ MY DOCUMENTS - UPDATED WITH DECRYPTED & HASH FILES
+    # ═══════════════════════════════════════════════════════════════════════
     def show_documents(self):
         self.header_title.configure(text="My Documents")
 
@@ -551,14 +565,18 @@ class UserDashboard:
         signed_files = self.audit.get_user_files(self.username, 'signed')
         encrypted_files = self.audit.get_user_files(self.username, 'encrypted')
 
-        # Also scan directories for files not in database (backward compat)
+        # Scan directories for all file types
         signed_files += self._scan_signed_files()
         encrypted_files += self._scan_encrypted_files()
+        decrypted_files = self._scan_decrypted_files()
+        hash_files = self._scan_hash_files()
 
-        # Document sections
+        # ✅ ALL DOCUMENT SECTIONS WITH SCROLLABLE
         doc_types = [
             ("📝 Signed Documents", signed_files, "#6366f1", "signed"),
             ("🔐 Encrypted Files", encrypted_files, "#f59e0b", "encrypted"),
+            ("🔓 Decrypted Files", decrypted_files, "#8b5cf6", "decrypted"),  # ✅ NEW
+            ("🔍 Hash Files", hash_files, "#ec4899", "hash"),  # ✅ NEW
             ("🏛 Certificates", self._get_cert_files(), "#10b981", "cert"),
         ]
 
@@ -577,7 +595,7 @@ class UserDashboard:
                                       font=("Inter", 11), text_color="#64748b")
             count_badge.pack(side="right")
 
-            # File list
+            # ✅ SCROLLABLE FILE LIST
             scroll = ctk.CTkScrollableFrame(frame, fg_color="transparent", height=180)
             scroll.pack(fill="x", padx=20, pady=(0, 15))
 
@@ -591,8 +609,6 @@ class UserDashboard:
     def _scan_signed_files(self):
         """Scan directories for signed files not in database"""
         files = []
-
-        # Scan user signatures directory
         sig_dir = f"storage/signatures/{self.username}"
         if os.path.exists(sig_dir):
             for f in os.listdir(sig_dir):
@@ -603,7 +619,6 @@ class UserDashboard:
                         'signed', fpath, f, os.path.getsize(fpath), 'active'
                     ))
 
-        # Scan embedded directory
         emb_dir = f"storage/signatures/{self.username}/embedded"
         if os.path.exists(emb_dir):
             for f in os.listdir(emb_dir):
@@ -619,7 +634,6 @@ class UserDashboard:
     def _scan_encrypted_files(self):
         """Scan directories for encrypted files not in database"""
         files = []
-
         enc_dir = f"storage/encrypted/{self.username}"
         if os.path.exists(enc_dir):
             for f in os.listdir(enc_dir):
@@ -628,6 +642,52 @@ class UserDashboard:
                     files.append((
                         datetime.fromtimestamp(os.path.getmtime(fpath)).isoformat(),
                         'encrypted', fpath, f, os.path.getsize(fpath), 'active'
+                    ))
+
+        return files
+
+    # ✅ NEW: SCAN DECRYPTED FILES
+    def _scan_decrypted_files(self):
+        """Scan directories for decrypted files"""
+        files = []
+        dec_dir = f"storage/encrypted/{self.username}/decrypted"
+        if os.path.exists(dec_dir):
+            for f in os.listdir(dec_dir):
+                if not f.startswith('.'):  # Skip hidden files
+                    fpath = os.path.join(dec_dir, f)
+                    if os.path.isfile(fpath):
+                        files.append((
+                            datetime.fromtimestamp(os.path.getmtime(fpath)).isoformat(),
+                            'decrypted', fpath, f, os.path.getsize(fpath), 'active'
+                        ))
+
+        return files
+
+    # ✅ NEW: SCAN HASH FILES
+    def _scan_hash_files(self):
+        """Scan for saved hash files"""
+        files = []
+        
+        # Scan storage directory for hash files
+        hash_dir = "storage"
+        if os.path.exists(hash_dir):
+            for f in os.listdir(hash_dir):
+                if f.endswith('_sha256.txt') or f.endswith('_hash.txt'):
+                    fpath = os.path.join(hash_dir, f)
+                    files.append((
+                        datetime.fromtimestamp(os.path.getmtime(fpath)).isoformat(),
+                        'hash', fpath, f, os.path.getsize(fpath), 'active'
+                    ))
+
+        # Also check user-specific hash files
+        user_hash_dir = f"storage/{self.username}"
+        if os.path.exists(user_hash_dir):
+            for f in os.listdir(user_hash_dir):
+                if f.endswith('_sha256.txt') or f.endswith('_hash.txt'):
+                    fpath = os.path.join(user_hash_dir, f)
+                    files.append((
+                        datetime.fromtimestamp(os.path.getmtime(fpath)).isoformat(),
+                        'hash', fpath, f, os.path.getsize(fpath), 'active'
                     ))
 
         return files
@@ -652,7 +712,13 @@ class UserDashboard:
         frame.pack(fill="x", pady=2)
 
         # File icon based on type
-        icons = {"signed": "📝", "encrypted": "🔐", "cert": "🏛"}
+        icons = {
+            "signed": "📝", 
+            "encrypted": "🔐", 
+            "decrypted": "🔓",  # ✅ NEW
+            "hash": "🔍",  # ✅ NEW
+            "cert": "🏛"
+        }
         icon = icons.get(ftype, "📄")
 
         # File name (truncated if too long)
@@ -731,7 +797,7 @@ class UserDashboard:
                 messagebox.showerror("Error", f"Could not save file: {str(e)}")
 
     def _delete_file(self, file_path, frame_widget):
-        """Delete file with confirmation"""
+        """Delete file with confirmation and empty folder cleanup"""
         if messagebox.askyesno("Confirm Delete", f"Delete {os.path.basename(file_path)}?"):
             try:
                 # Mark as deleted in database
@@ -740,6 +806,18 @@ class UserDashboard:
                 # Actually delete file
                 if os.path.exists(file_path):
                     os.remove(file_path)
+
+                    # Clean up empty parent folder
+                    parent_dir = os.path.dirname(file_path)
+                    if os.path.exists(parent_dir) and not os.listdir(parent_dir):
+                        os.rmdir(parent_dir)
+                        print(f"✅ Removed empty folder: {parent_dir}")
+
+                        # Also check grandparent (user folder) if it becomes empty
+                        grandparent = os.path.dirname(parent_dir)
+                        if os.path.exists(grandparent) and not os.listdir(grandparent):
+                            os.rmdir(grandparent)
+                            print(f"✅ Removed empty user folder: {grandparent}")
 
                 # Remove from UI
                 frame_widget.destroy()
@@ -865,6 +943,20 @@ class UserDashboard:
         self.notifications = ctk.BooleanVar(value=True)
         ctk.CTkSwitch(notif_frame, variable=self.notifications).pack(side="right")
 
+        # Danger Zone - Delete Account
+        danger_frame = ctk.CTkFrame(settings_frame, fg_color="#0f172a", corner_radius=10)
+        danger_frame.pack(fill="x", padx=30, pady=(30, 10))
+
+        ctk.CTkLabel(danger_frame, text="🚨 Danger Zone", 
+                    font=("Inter", 16, "bold"), text_color="#ef4444").pack(anchor="w", padx=15, pady=(15, 5))
+
+        ctk.CTkLabel(danger_frame, text="Once you delete your account, there is no going back. Please be certain.", 
+                    font=("Inter", 12), text_color="#94a3b8").pack(anchor="w", padx=15, pady=(0, 10))
+
+        ctk.CTkButton(danger_frame, text="🗑️ Delete My Account", width=200, height=40,
+                     font=("Inter", 14, "bold"), fg_color="#ef4444", hover_color="#dc2626",
+                     corner_radius=10, command=self.delete_my_account).pack(anchor="w", padx=15, pady=(0, 15))
+
     def toggle_theme(self):
         if self.dark_mode.get():
             ctk.set_appearance_mode("dark")
@@ -889,7 +981,7 @@ class UserDashboard:
             # Calculate hash
             file_hash = generate_hash(file)
 
-            # Create hash display dialog (same style as main_app.py)
+            # Create hash display dialog
             hash_dialog = ctk.CTkToplevel(self.root)
             hash_dialog.title("🔍 SHA-256 File Hash")
             hash_dialog.geometry("700x280")
@@ -946,6 +1038,16 @@ class UserDashboard:
                         f.write(f"File: {file_name}\n")
                         f.write(f"SHA-256: {file_hash}\n")
                         f.write(f"Generated: {datetime.now().isoformat()}\n")
+                    
+                    # ✅ TRACK HASH FILE
+                    self.audit.add_user_file(
+                        username=self.username,
+                        file_type='hash',
+                        file_path=save_path,
+                        original_name=os.path.basename(save_path),
+                        file_size=os.path.getsize(save_path)
+                    )
+                    
                     messagebox.showinfo("Saved", f"Hash saved to:\n{save_path}", parent=hash_dialog)
 
             ctk.CTkButton(btn_frame, text="📋 Copy to Clipboard", width=180, height=38,
@@ -1153,6 +1255,7 @@ class UserDashboard:
             parent=dialog)
 
         dialog.destroy()
+        # ✅ AUTO REFRESH DASHBOARD
         self.show_dashboard()
 
     def _sign_embedded(self, file_path, dialog):
@@ -1178,6 +1281,7 @@ class UserDashboard:
             parent=dialog)
 
         dialog.destroy()
+        # ✅ AUTO REFRESH DASHBOARD
         self.show_dashboard()
 
     def quick_verify(self):
@@ -1192,6 +1296,7 @@ class UserDashboard:
                 result = verify_document(file, f"storage/keystores/{self.username}_public.pem", self.username)
                 messagebox.showinfo("Verify", f"Result: {result}")
                 self.audit.log(self.username, "VERIFY", result, file_name=os.path.basename(file))
+                # ✅ AUTO REFRESH
                 self.show_dashboard()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
@@ -1219,6 +1324,7 @@ class UserDashboard:
 
                 messagebox.showinfo("Encrypt", f"File encrypted successfully!\n\nSaved to: {enc_path}")
                 self.audit.log(self.username, "ENCRYPT", "SUCCESS", file_name=os.path.basename(file))
+                # ✅ AUTO REFRESH DASHBOARD
                 self.show_dashboard()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
@@ -1246,6 +1352,15 @@ class UserDashboard:
 
             output_path = decrypt_file(self.username, file, "")
 
+            # ✅ TRACK DECRYPTED FILE
+            self.audit.add_user_file(
+                username=self.username,
+                file_type='decrypted',
+                file_path=output_path,
+                original_name=os.path.basename(output_path),
+                file_size=os.path.getsize(output_path)
+            )
+
             messagebox.showinfo(
                 "✅ Decrypt Success", 
                 f"File decrypted successfully!\n\n"
@@ -1264,6 +1379,7 @@ class UserDashboard:
                 details=f"Output: {os.path.basename(output_path)}"
             )
 
+            # ✅ AUTO REFRESH DASHBOARD
             self.show_dashboard()
 
         except Exception as e:
@@ -1318,3 +1434,75 @@ class UserDashboard:
         # ✅ Go back to login screen
         from main import show_login
         show_login()
+
+    def delete_my_account(self):
+        """User self-deletion with complete cleanup"""
+        if messagebox.askyesno("⚠️ DANGER", 
+            f"PERMANENTLY delete your account '{self.username}'?\n\n"
+            f"This will delete ALL your files, signatures, keys, and certificates.\n"
+            f"This action CANNOT be undone!",
+            icon='warning'):
+
+            # 1. Delete user from database
+            conn = sqlite3.connect(self.auth.db_path)
+            conn.execute("DELETE FROM users WHERE username = ?", (self.username,))
+            conn.commit()
+            conn.close()
+
+            # 2. Delete user's encrypted files and folder
+            user_enc_dir = f"storage/encrypted/{self.username}"
+            if os.path.exists(user_enc_dir):
+                try:
+                    shutil.rmtree(user_enc_dir)
+                    print(f"✅ Deleted encrypted folder: {user_enc_dir}")
+                except Exception as e:
+                    print(f"⚠️ Could not delete encrypted folder: {e}")
+
+            # 3. Delete user's signature files and folder
+            user_sig_dir = f"storage/signatures/{self.username}"
+            if os.path.exists(user_sig_dir):
+                try:
+                    shutil.rmtree(user_sig_dir)
+                    print(f"✅ Deleted signatures folder: {user_sig_dir}")
+                except Exception as e:
+                    print(f"⚠️ Could not delete signatures folder: {e}")
+
+            # 4. Delete user's key files
+            user_priv_key = f"storage/keystores/{self.username}_private.pem"
+            user_pub_key = f"storage/keystores/{self.username}_public.pem"
+            for key_file in [user_priv_key, user_pub_key]:
+                if os.path.exists(key_file):
+                    try:
+                        os.remove(key_file)
+                        print(f"✅ Deleted key: {key_file}")
+                    except Exception as e:
+                        print(f"⚠️ Could not delete key: {e}")
+
+            # 5. Delete user's certificate
+            user_cert = f"storage/certs/{self.username}_cert.pem"
+            if os.path.exists(user_cert):
+                try:
+                    os.remove(user_cert)
+                    print(f"✅ Deleted certificate: {user_cert}")
+                except Exception as e:
+                    print(f"⚠️ Could not delete certificate: {e}")
+
+            # 6. Clean up audit data
+            try:
+                conn = sqlite3.connect("storage/audit.db")
+                conn.execute("DELETE FROM audit_log WHERE username = ?", (self.username,))
+                conn.execute("DELETE FROM user_files WHERE username = ?", (self.username,))
+                conn.execute("DELETE FROM user_activity WHERE username = ?", (self.username,))
+                conn.commit()
+                conn.close()
+                print(f"✅ Cleaned audit data for: {self.username}")
+            except Exception as e:
+                print(f"⚠️ Could not clean audit data: {e}")
+
+            messagebox.showinfo("Account Deleted", 
+                f"Your account '{self.username}' has been permanently deleted.\n"
+                f"All your data has been cleaned up.")
+
+            self.root.destroy()
+            from main import show_login
+            show_login()
