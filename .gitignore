@@ -36,6 +36,7 @@ storage/keystores/
 storage/certs/
 storage/signatures/
 backups/
+storage/*.hash
 
 # Other
 *.nonce
