@@ -665,30 +665,57 @@ class UserDashboard:
 
     # ✅ NEW: SCAN HASH FILES
     def _scan_hash_files(self):
-        """Scan for saved hash files"""
+        """Scan for saved hash files in all possible locations + database"""
         files = []
-        
-        # Scan storage directory for hash files
-        hash_dir = "storage"
-        if os.path.exists(hash_dir):
-            for f in os.listdir(hash_dir):
-                if f.endswith('_sha256.txt') or f.endswith('_hash.txt'):
-                    fpath = os.path.join(hash_dir, f)
-                    files.append((
-                        datetime.fromtimestamp(os.path.getmtime(fpath)).isoformat(),
-                        'hash', fpath, f, os.path.getsize(fpath), 'active'
-                    ))
+        seen_paths = set()
 
-        # Also check user-specific hash files
-        user_hash_dir = f"storage/{self.username}"
+        # ✅ GET HASH FILES FROM DATABASE (tracked via add_user_file)
+        db_files = self.audit.get_user_files(self.username, 'hash')
+        for file_info in db_files:
+            timestamp, file_type, file_path, original_name, file_size, status = file_info
+            if file_path not in seen_paths and os.path.exists(file_path):
+                seen_paths.add(file_path)
+                files.append(file_info)
+
+        # ✅ PRIMARY: Auto-saved hash directory (like other operations)
+        user_hash_dir = f"storage/hash/{self.username}"
         if os.path.exists(user_hash_dir):
-            for f in os.listdir(user_hash_dir):
-                if f.endswith('_sha256.txt') or f.endswith('_hash.txt'):
-                    fpath = os.path.join(user_hash_dir, f)
-                    files.append((
-                        datetime.fromtimestamp(os.path.getmtime(fpath)).isoformat(),
-                        'hash', fpath, f, os.path.getsize(fpath), 'active'
-                    ))
+            try:
+                for f in os.listdir(user_hash_dir):
+                    if f.endswith('_sha256.txt') or f.endswith('_hash.txt'):
+                        fpath = os.path.join(user_hash_dir, f)
+                        if os.path.isfile(fpath) and fpath not in seen_paths:
+                            seen_paths.add(fpath)
+                            files.append((
+                                datetime.fromtimestamp(os.path.getmtime(fpath)).isoformat(),
+                                'hash', fpath, f, os.path.getsize(fpath), 'active'
+                            ))
+            except:
+                pass
+
+        # Fallback: Check other possible locations
+        hash_dirs = [
+            "storage",
+            f"storage/{self.username}",
+            f"storage/encrypted/{self.username}",
+            f"storage/signatures/{self.username}",
+            f"storage/encrypted/{self.username}/decrypted",
+        ]
+
+        for hash_dir in hash_dirs:
+            if os.path.exists(hash_dir):
+                try:
+                    for f in os.listdir(hash_dir):
+                        if f.endswith('_sha256.txt') or f.endswith('_hash.txt'):
+                            fpath = os.path.join(hash_dir, f)
+                            if os.path.isfile(fpath) and fpath not in seen_paths:
+                                seen_paths.add(fpath)
+                                files.append((
+                                    datetime.fromtimestamp(os.path.getmtime(fpath)).isoformat(),
+                                    'hash', fpath, f, os.path.getsize(fpath), 'active'
+                                ))
+                except:
+                    pass
 
         return files
 
@@ -696,7 +723,7 @@ class UserDashboard:
         """Get certificate files"""
         files = []
         cert_path = f"storage/certs/{self.username}_cert.pem"
-        if os.path.exists(cert_path):
+        if os.path.exists(cert_path) and os.path.isfile(cert_path):
             files.append((
                 datetime.fromtimestamp(os.path.getmtime(cert_path)).isoformat(),
                 'cert', cert_path, f"{self.username}_cert.pem", 
@@ -736,8 +763,9 @@ class UserDashboard:
         actions = ctk.CTkFrame(frame, fg_color="transparent")
         actions.pack(side="right", padx=10)
 
-        # View/Open button
-        ctk.CTkButton(actions, text="👁 Open", width=60, height=25,
+        # View/Open button - "View" for cert, "Open" for others
+        btn_text = "👁 View" if ftype == "cert" else "👁 Open"
+        ctk.CTkButton(actions, text=btn_text, width=60, height=25,
                      font=("Inter", 10), fg_color="#6366f1", hover_color="#4f46e5",
                      corner_radius=6, command=lambda p=file_path: self._open_file(p)).pack(side="left", padx=2)
 
@@ -763,7 +791,12 @@ class UserDashboard:
     def _open_file(self, file_path):
         """Open file with default application"""
         if not os.path.exists(file_path):
-            messagebox.showerror("Error", "File not found!")
+            messagebox.showerror("Error", f"File not found!\n{file_path}")
+            return
+
+        # If it's a certificate, show in viewer dialog
+        if file_path.endswith('.pem') or file_path.endswith('.crt') or file_path.endswith('.cert'):
+            self._view_cert_file(file_path)
             return
 
         try:
@@ -775,6 +808,49 @@ class UserDashboard:
             messagebox.showinfo("Open", f"Opening: {os.path.basename(file_path)}")
         except Exception as e:
             messagebox.showerror("Error", f"Could not open file: {str(e)}")
+
+    def _view_cert_file(self, cert_path):
+        """View certificate file content in a dialog"""
+        if not os.path.exists(cert_path):
+            messagebox.showerror("Error", f"Certificate not found!\n{cert_path}")
+            return
+
+        try:
+            with open(cert_path, 'r') as f:
+                content = f.read()
+
+            dialog = ctk.CTkToplevel(self.root)
+            dialog.title(f"Certificate - {os.path.basename(cert_path)}")
+            dialog.geometry("650x450")
+            dialog.configure(fg_color="#0f172a")
+            dialog.resizable(False, False)
+            dialog.transient(self.root)
+            dialog.grab_set()
+
+            # Center dialog
+            dialog.update_idletasks()
+            x = (dialog.winfo_screenwidth() - 650) // 2
+            y = (dialog.winfo_screenheight() - 450) // 2
+            dialog.geometry(f"+{x}+{y}")
+
+            ctk.CTkLabel(dialog, text="🏛 Certificate Viewer", 
+                        font=("Inter", 18, "bold"), text_color="#6366f1").pack(pady=(20, 10))
+
+            ctk.CTkLabel(dialog, text=f"📄 {os.path.basename(cert_path)}", 
+                        font=("Inter", 12), text_color="#94a3b8").pack(pady=(0, 10))
+
+            text_box = ctk.CTkTextbox(dialog, width=600, height=320, font=("Courier", 10),
+                                      fg_color="#1e293b", text_color="#f8fafc")
+            text_box.pack(pady=10)
+            text_box.insert("1.0", content)
+            text_box.configure(state="disabled")
+
+            ctk.CTkButton(dialog, text="Close", width=100, height=35,
+                         font=("Inter", 12), fg_color="#64748b", hover_color="#475569",
+                         corner_radius=8, command=dialog.destroy).pack(pady=15)
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not read certificate: {str(e)}")
 
     def _save_file_as(self, file_path, original_name):
         """Save file to user chosen location"""
@@ -964,7 +1040,7 @@ class UserDashboard:
             ctk.set_appearance_mode("light")
 
     def quick_hash(self):
-        """Calculate SHA-256 hash of selected file"""
+        """Calculate SHA-256 hash of selected file - auto-saves to user hash directory"""
         file = filedialog.askopenfilename(
             title="Select file to calculate hash",
             filetypes=[("All Files", "*.*"), ("PDF Files", "*.pdf"), 
@@ -980,11 +1056,37 @@ class UserDashboard:
 
             # Calculate hash
             file_hash = generate_hash(file)
+            file_name = os.path.basename(file)
+
+            # ✅ AUTO-SAVE: Create user hash directory and save hash automatically
+            user_hash_dir = f"storage/hash/{self.username}"
+            os.makedirs(user_hash_dir, exist_ok=True)
+
+            # Auto-save hash file (like other operations auto-save their outputs)
+            safe_name = file_name.replace(" ", "_")
+            auto_hash_path = os.path.join(user_hash_dir, f"{safe_name}_sha256.txt")
+
+            with open(auto_hash_path, 'w') as hf:
+                hf.write("File: " + file_name + chr(10))
+                hf.write("SHA-256: " + file_hash + chr(10))
+                hf.write("Generated: " + datetime.now().isoformat() + chr(10))
+                hf.write("By User: " + self.username + chr(10))
+
+            # ✅ TRACK IN DATABASE (auto-tracked, no need for manual save)
+            self.audit.add_user_file(
+                username=self.username,
+                file_type='hash',
+                file_path=auto_hash_path,
+                original_name=os.path.basename(auto_hash_path),
+                file_size=os.path.getsize(auto_hash_path)
+            )
+
+            print(f"✅ Hash auto-saved to: {auto_hash_path}")
 
             # Create hash display dialog
             hash_dialog = ctk.CTkToplevel(self.root)
             hash_dialog.title("🔍 SHA-256 File Hash")
-            hash_dialog.geometry("700x280")
+            hash_dialog.geometry("700x320")
             hash_dialog.configure(fg_color="#0f172a")
             hash_dialog.resizable(False, False)
             hash_dialog.transient(self.root)
@@ -993,17 +1095,20 @@ class UserDashboard:
             # Center dialog
             hash_dialog.update_idletasks()
             x = (hash_dialog.winfo_screenwidth() - 700) // 2
-            y = (hash_dialog.winfo_screenheight() - 280) // 2
+            y = (hash_dialog.winfo_screenheight() - 320) // 2
             hash_dialog.geometry(f"+{x}+{y}")
 
             # Title
             ctk.CTkLabel(hash_dialog, text="🔍 SHA-256 File Hash", 
-                        font=("Inter", 20, "bold"), text_color="#f59e0b").pack(pady=(25, 10))
+                        font=("Inter", 20, "bold"), text_color="#f59e0b").pack(pady=(20, 5))
 
             # File info
-            file_name = os.path.basename(file)
             ctk.CTkLabel(hash_dialog, text=f"📄 {file_name}", 
-                        font=("Inter", 12), text_color="#94a3b8").pack(pady=(0, 15))
+                        font=("Inter", 12), text_color="#94a3b8").pack(pady=(0, 10))
+
+            # Auto-saved info
+            ctk.CTkLabel(hash_dialog, text=f"✅ Auto-saved to: {auto_hash_path}", 
+                        font=("Inter", 11), text_color="#10b981").pack(pady=(0, 10))
 
             # Hash display
             hash_frame = ctk.CTkFrame(hash_dialog, fg_color="#1e293b", corner_radius=10)
@@ -1027,6 +1132,7 @@ class UserDashboard:
                 messagebox.showinfo("Copied", "Hash copied to clipboard!", parent=hash_dialog)
 
             def save_hash_to_file():
+                # Allow user to save additional copy anywhere
                 save_path = filedialog.asksaveasfilename(
                     defaultextension=".txt",
                     initialfile=f"{file_name}_sha256.txt",
@@ -1035,27 +1141,18 @@ class UserDashboard:
                 )
                 if save_path:
                     with open(save_path, 'w') as f:
-                        f.write(f"File: {file_name}\n")
-                        f.write(f"SHA-256: {file_hash}\n")
-                        f.write(f"Generated: {datetime.now().isoformat()}\n")
-                    
-                    # ✅ TRACK HASH FILE
-                    self.audit.add_user_file(
-                        username=self.username,
-                        file_type='hash',
-                        file_path=save_path,
-                        original_name=os.path.basename(save_path),
-                        file_size=os.path.getsize(save_path)
-                    )
-                    
-                    messagebox.showinfo("Saved", f"Hash saved to:\n{save_path}", parent=hash_dialog)
+                        f.write("File: " + file_name + chr(10))
+                        f.write("SHA-256: " + file_hash + chr(10))
+                        f.write("Generated: " + datetime.now().isoformat() + chr(10))
+
+                    messagebox.showinfo("Saved", "Hash saved to:" + chr(10) + save_path, parent=hash_dialog)
 
             ctk.CTkButton(btn_frame, text="📋 Copy to Clipboard", width=180, height=38,
                          font=("Inter", 12, "bold"), fg_color="#6366f1", 
                          hover_color="#4f46e5", corner_radius=8,
                          command=copy_to_clipboard).pack(side="left", padx=8)
 
-            ctk.CTkButton(btn_frame, text="💾 Save to File", width=160, height=38,
+            ctk.CTkButton(btn_frame, text="💾 Save As (Extra Copy)", width=180, height=38,
                          font=("Inter", 12, "bold"), fg_color="#10b981", 
                          hover_color="#059669", corner_radius=8,
                          command=save_hash_to_file).pack(side="left", padx=8)
@@ -1069,13 +1166,17 @@ class UserDashboard:
             self.audit.log(self.username, "HASH", "SUCCESS", 
                           file_name=file_name, 
                           file_hash=file_hash[:16],
-                          details=f"File: {file_name}")
+                          details=f"File: {file_name}, Auto-saved: {auto_hash_path}")
+
+            # ✅ AUTO REFRESH DASHBOARD
+            self.show_dashboard()
 
         except Exception as e:
             messagebox.showerror("Error", f"Hash calculation failed: {str(e)}")
             self.audit.log(self.username, "HASH", "FAILED", 
                           file_name=os.path.basename(file), 
                           details=str(e))
+
 
     def quick_sign(self):
         """Open sign dialog with mode selection"""
