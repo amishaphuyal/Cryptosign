@@ -273,7 +273,7 @@ Audit Logging
 
 <div align="center">
 
-<img src="docs/screenshots/login.png" width="700">
+<img src="Assets/Screenshot 2026-06-13 090816.png" width="700">
 
 <br><br>
 
