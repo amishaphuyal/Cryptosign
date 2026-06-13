@@ -1,83 +1,340 @@
-# CryptoSign
+<div align="center">
 
-**CryptoSign** is a secure and user-friendly digital signature and certificate management application. It allows users to digitally sign PDF documents, manage cryptographic keys and certificates, and perform encryption/decryption operations with both graphical and command-line interfaces.
+<h1>🔐 CryptoSign</h1>
 
-## Features
+<h3>Secure Digital Signature & Certificate Management Platform</h3>
 
-- **PDF Digital Signing** — Support for PKCS#7 and smart card signing
-- **Certificate Authority (CA)** — Create, issue, verify, and revoke digital certificates
-- **Key Management** — Generate, import, and manage private keys and certificates
-- **Encryption & Decryption** — Secure file encryption and decryption
-- **Hashing Utilities** — Multiple hashing algorithms support
-- **User Interfaces** — Modern GUI and efficient CLI tools
-- **Batch Signing** — Sign multiple documents at once
+<br>
 
-## Quick Start (Windows)
+<img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white">
 
-1. **Create and activate virtual environment:**
+<img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge">
 
-   ```powershell
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
+<img src="https://img.shields.io/badge/Cryptography-RSA--2048%20%7C%20AES--256--GCM-red?style=for-the-badge">
 
-Install required packages:PowerShellpip install -r requirement.txt
-Run the application:PowerShellpython main.py
+<img src="https://img.shields.io/badge/Platform-Windows%20|%20Linux%20|%20macOS-blue?style=for-the-badge">
 
-## Project Structure
+<br><br>
+
+<b>Enterprise Grade Digital Signature, Certificate Authority & Secure Document Protection System</b>
+
+<br><br>
+
+</div>
+
+<hr>
+
+<h2>📖 About CryptoSign</h2>
+
+<p align="justify">
+CryptoSign is a comprehensive Digital Signature and Certificate Management Platform developed using Python. It enables secure document signing, certificate issuance, verification, revocation, encryption, decryption, key management, and audit logging through a modern graphical interface.
+
+The system implements industry-standard cryptographic technologies including RSA-2048, AES-256-GCM, SHA-256, PKCS#7 Digital Signatures, and X.509 Certificates to ensure confidentiality, integrity, authenticity, and non-repudiation.
+</p>
+
+<hr>
+
+<h2>✨ Core Features</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Description</th>
+<th>Technology</th>
+</tr>
+
+<tr>
+<td>📝 PDF Digital Signing</td>
+<td>Embedded & PKCS#7 Signatures</td>
+<td>PyHanko</td>
+</tr>
+
+<tr>
+<td>🏛 Certificate Authority</td>
+<td>Issue, Verify & Revoke Certificates</td>
+<td>X.509</td>
+</tr>
+
+<tr>
+<td>🔑 Key Management</td>
+<td>RSA Public/Private Key Generation</td>
+<td>RSA-2048</td>
+</tr>
+
+<tr>
+<td>🔒 Encryption</td>
+<td>Hybrid File Encryption</td>
+<td>AES-256-GCM + RSA-OAEP</td>
+</tr>
+
+<tr>
+<td>🔓 Decryption</td>
+<td>Secure File Recovery</td>
+<td>RSA + AES</td>
+</tr>
+
+<tr>
+<td>🔍 Hashing</td>
+<td>Document Integrity Verification</td>
+<td>SHA-256</td>
+</tr>
+
+<tr>
+<td>📦 Batch Signing</td>
+<td>Multiple Document Processing</td>
+<td>RSA-PSS</td>
+</tr>
+
+<tr>
+<td>👤 User Management</td>
+<td>Admin & User Roles</td>
+<td>SQLite</td>
+</tr>
+
+<tr>
+<td>📊 Audit Logging</td>
+<td>Security Event Tracking</td>
+<td>SQLite</td>
+</tr>
+
+</table>
+
+<hr>
+
+<h2>🛠 Technology Stack</h2>
+
+<table>
+<tr>
+<th>Category</th>
+<th>Technology</th>
+</tr>
+
+<tr>
+<td>Programming Language</td>
+<td>Python 3.9+</td>
+</tr>
+
+<tr>
+<td>GUI Framework</td>
+<td>CustomTkinter</td>
+</tr>
+
+<tr>
+<td>Database</td>
+<td>SQLite</td>
+</tr>
+
+<tr>
+<td>Cryptography</td>
+<td>Cryptography Library</td>
+</tr>
+
+<tr>
+<td>Digital Signature</td>
+<td>PyHanko</td>
+</tr>
+
+<tr>
+<td>Certificate Management</td>
+<td>X.509 PKI</td>
+</tr>
+
+<tr>
+<td>Encryption</td>
+<td>RSA-2048 + AES-256-GCM</td>
+</tr>
+
+<tr>
+<td>Hashing</td>
+<td>SHA-256</td>
+</tr>
+
+</table>
+
+<hr>
+
+<h2>🏗 System Architecture</h2>
+
+<pre>
+CryptoSign
+│
+├── Authentication Layer
+│   ├── Login
+│   ├── Registration
+│   └── Access Control
+│
+├── Cryptographic Layer
+│   ├── RSA Key Management
+│   ├── Certificate Authority
+│   ├── PKCS#7 Signing
+│   ├── Encryption
+│   ├── Decryption
+│   └── Hash Verification
+│
+├── Application Layer
+│   ├── User Dashboard
+│   ├── Admin Dashboard
+│   ├── Batch Signing
+│   └── History Viewer
+│
+└── Storage Layer
+    ├── Audit Logs
+    ├── Certificates
+    ├── Keystores
+    ├── Signatures
+    └── Encrypted Files
+</pre>
+
+<hr>
+
+<h2>📂 Project Structure</h2>
+
+<pre>
 CryptoSign/
-├── 📁 core/                    # Core cryptographic engines
-│   ├── init.py
-│   ├── audit_logger.py         # SQLite audit logging
-│   ├── auth_system.py          # User authentication (SHA-256)
-│   ├── auto_convert.py         # Office to PDF conversion
-│   ├── batch_sign.py           # Batch document signing
-│   ├── ca_engine.py            # Certificate Authority
-│   ├── cert_manager.py         # X.509 certificate issuance
-│   ├── cert_verifier.py        # Certificate validation
-│   ├── decrypt_engine.py       # Hybrid decryption (RSA+AES)
-│   ├── embed_pdf.py            # PDF embedded signatures
-│   ├── encrypt_engine.py       # Hybrid encryption (RSA+AES)
-│   ├── hash_engine.py          # SHA-256 file hashing
-│   ├── history_viewer.py       # Audit history dialog
-│   ├── key_manager.py          # RSA key pair generation
-│   ├── pkcs_sign.py            # PKCS#7 PDF signing
-│   ├── revocation.py           # Certificate revocation
-│   ├── sign_engine.py          # External .sig signing
-│   ├── smart_sign.py           # Auto mode signing
-│   └── verify_engine.py        # Signature verification
-├── 📁 gui/                     # User interface
-│   ├── init.py
-│   ├── admin_dashboard.py      # Admin panel (full featured)
-│   ├── login_dialog.py         # Login/Register UI
-│   ├── main_app.py             # Main application window
-│   └── user_dashboard.py       # User dashboard
-├── 📁 storage/                 # Data storage (auto-created)
-│   ├── audit.db                # Audit logs database
-│   ├── auth.db                 # User auth database
-│   ├── backups/                # Database backups
-│   ├── ca/                     # CA certificates
-│   │   ├── ca_cert.pem
-│   │   └── ca_private.pem
-│   ├── certs/                  # User certificates
-│   │   └── {username}_cert.pem
-│   ├── encrypted/              # Encrypted files
-│   │   └── {username}/
-│   ├── keystores/              # Private keys
-│   │   ├── {username}_private.pem
-│   │   └── {username}_public.pem
-│   └── signatures/             # Signed documents
-│       └── {username}/
-├── 📄 .gitignore               # Git ignore rules
-├── 📄 LICENSE                  # MIT License
-├── 📄 main.py                  # Application entry point
-├── 📄 main_app.py              # CryptoSignApp class
-├── 📄 README.md                # This file
-└── 📄 requirements.txt         # Python dependencies
-Security Recommendations
+│
+├── core/
+├── gui/
+├── storage/
+│
+├── main.py
+├── requirements.txt
+├── LICENSE
+└── README.md
+</pre>
 
-Never commit private keys, keystores, or sensitive credentials to Git.
-Keep storage/keystores/ and storage/certs/ directories secure and preferably offline.
-Use strong passwords for all keystores and private keys.
+<hr>
 
-License
-This project is licensed under the MIT License. See the LICENSE file for more details.
+<h2>🚀 Installation</h2>
+
+<h3>1️⃣ Clone Repository</h3>
+
+<pre>
+git clone https://github.com/yourusername/CryptoSign.git
+cd CryptoSign
+</pre>
+
+<h3>2️⃣ Create Virtual Environment</h3>
+
+<pre>
+python -m venv venv
+.\venv\Scripts\activate
+</pre>
+
+<h3>3️⃣ Install Dependencies</h3>
+
+<pre>
+pip install -r requirements.txt
+</pre>
+
+<h3>4️⃣ Run Application</h3>
+
+<pre>
+python main.py
+</pre>
+
+<hr>
+
+<h2>🎯 Application Workflow</h2>
+
+<pre>
+User Login
+    ↓
+Generate RSA Keys
+    ↓
+Issue Certificate
+    ↓
+Sign Document
+    ↓
+Verify Signature
+    ↓
+Encrypt / Decrypt Files
+    ↓
+Audit Logging
+</pre>
+
+<hr>
+
+<h2>🔒 Security Features</h2>
+
+<ul>
+<li>RSA-2048 Key Pair Generation</li>
+<li>AES-256-GCM Encryption</li>
+<li>PKCS#7 Digital Signatures</li>
+<li>X.509 Certificate Authority</li>
+<li>Certificate Revocation Management</li>
+<li>Role-Based Access Control</li>
+<li>SHA-256 Integrity Verification</li>
+<li>Comprehensive Audit Logging</li>
+</ul>
+
+<hr>
+
+<h2>📸 Screenshots</h2>
+
+<div align="center">
+
+<img src="docs/screenshots/login.png" width="700">
+
+<br><br>
+
+<b>Secure Login Interface</b>
+
+<br><br>
+
+<img src="docs/screenshots/user_dashboard.png" width="700">
+
+<br><br>
+
+<b>User Dashboard</b>
+
+<br><br>
+
+<img src="docs/screenshots/admin_dashboard.png" width="700">
+
+<br><br>
+
+<b>Admin Dashboard</b>
+
+</div>
+
+<hr>
+
+<h2>⚠️ Security Notice</h2>
+
+<pre>
+storage/
+*.pem
+*.key
+*.crt
+*.db
+*.pfx
+*.p12
+</pre>
+
+<p>
+Never upload private keys, certificates, keystores, databases, or encrypted files to public repositories.
+</p>
+
+<hr>
+
+<h2>📜 License</h2>
+
+<p>
+This project is licensed under the MIT License.
+</p>
+
+<hr>
+
+<div align="center">
+
+<h2>👨‍💻 Developer</h2>
+
+<h3>Amisha Phuyal</h3>
+
+Cybersecurity Enthusiast • VAPT Researcher • Python Developer
+
+<br>
+
+⭐ If you found this project useful, consider giving it a star.
+
+</div>
