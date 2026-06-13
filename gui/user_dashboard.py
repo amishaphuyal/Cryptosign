@@ -934,35 +934,320 @@ class UserDashboard:
     def show_profile(self):
         self.header_title.configure(text="My Profile")
 
-        profile_frame = ctk.CTkFrame(self.content_frame, fg_color="#111827", corner_radius=12)
-        profile_frame.pack(fill="both", expand=True)
+        # Main container
+        main_container = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        main_container.pack(fill="both", expand=True)
 
-        info = ctk.CTkFrame(profile_frame, fg_color="transparent")
-        info.pack(fill="x", padx=30, pady=30)
+        # ═══════════════════════════════════════════════════════
+        # TOP SECTION: Profile Card + Stats
+        # ═══════════════════════════════════════════════════════
+        top_section = ctk.CTkFrame(main_container, fg_color="transparent")
+        top_section.pack(fill="x", pady=(0, 15))
 
-        ctk.CTkLabel(info, text="👤", font=("Inter", 64)).pack()
-        ctk.CTkLabel(info, text=self.username, 
-                    font=("Inter", 24, "bold"), text_color="#f8fafc").pack()
-        ctk.CTkLabel(info, text="Standard User", 
-                    font=("Inter", 14), text_color="#94a3b8").pack()
+        # Profile Card
+        profile_card = ctk.CTkFrame(top_section, fg_color="#111827", corner_radius=16)
+        profile_card.pack(side="left", fill="both", expand=True, padx=(0, 10))
 
-        stats = ctk.CTkFrame(profile_frame, fg_color="transparent")
-        stats.pack(fill="x", padx=30, pady=20)
+        # Avatar & Basic Info
+        avatar_frame = ctk.CTkFrame(profile_card, fg_color="transparent")
+        avatar_frame.pack(fill="x", padx=25, pady=(25, 15))
+
+        # Avatar circle
+        avatar = ctk.CTkFrame(avatar_frame, fg_color="#6366f1", width=80, height=80, corner_radius=40)
+        avatar.pack(side="left")
+        avatar.pack_propagate(False)
+        ctk.CTkLabel(avatar, text=self.username[0].upper(), font=("Inter", 32, "bold"), 
+                    text_color="white").place(relx=0.5, rely=0.5, anchor="center")
+
+        info_frame = ctk.CTkFrame(avatar_frame, fg_color="transparent")
+        info_frame.pack(side="left", padx=(20, 0), fill="y")
+
+        ctk.CTkLabel(info_frame, text=self.username, 
+                    font=("Inter", 22, "bold"), text_color="#f8fafc").pack(anchor="w")
+
+        role_badge = ctk.CTkFrame(info_frame, fg_color="#6366f1", corner_radius=6)
+        role_badge.pack(anchor="w", pady=(5, 0))
+        ctk.CTkLabel(role_badge, text="  Standard User  ", 
+                    font=("Inter", 11, "bold"), text_color="white").pack(padx=8, pady=3)
+
+        # Profile Details Grid
+        details_grid = ctk.CTkFrame(profile_card, fg_color="transparent")
+        details_grid.pack(fill="x", padx=25, pady=(0, 20))
+
+        # Get user details from DB
+        try:
+            conn = sqlite3.connect(self.auth.db_path)
+            cursor = conn.execute("SELECT created_at, last_login, status, first_login FROM users WHERE username = ?", 
+                                (self.username,))
+            user_data = cursor.fetchone()
+            conn.close()
+            created_at = user_data[0][:10] if user_data and user_data[0] else "N/A"
+            last_login = user_data[1][:10] if user_data and user_data[1] else "N/A"
+            status = user_data[2] if user_data else "active"
+            first_login = user_data[3] if user_data else 0
+        except:
+            created_at = "N/A"
+            last_login = "N/A"
+            status = "active"
+            first_login = 0
+
+        details = [
+            ("📅 Joined", created_at),
+            ("🕐 Last Login", last_login),
+            ("📊 Status", status.upper()),
+            ("🔐 First Login", "Yes" if first_login else "No"),
+        ]
+
+        for i, (label, value) in enumerate(details):
+            detail_frame = ctk.CTkFrame(details_grid, fg_color="#0a0e1a", corner_radius=8)
+            detail_frame.pack(side="left", fill="both", expand=True, padx=(0 if i==0 else 8, 8 if i<3 else 0), pady=5)
+            ctk.CTkLabel(detail_frame, text=label, font=("Inter", 10), 
+                        text_color="#64748b").pack(anchor="w", padx=12, pady=(8, 0))
+            ctk.CTkLabel(detail_frame, text=value, font=("Inter", 12, "bold"), 
+                        text_color="#f8fafc").pack(anchor="w", padx=12, pady=(0, 8))
+
+        # Quick Stats Card
+        stats_card = ctk.CTkFrame(top_section, fg_color="#111827", corner_radius=16, width=320)
+        stats_card.pack(side="right", fill="y", padx=(10, 0))
+        stats_card.pack_propagate(False)
+
+        ctk.CTkLabel(stats_card, text="📊 Activity Overview", 
+                    font=("Inter", 16, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(20, 15))
 
         try:
             conn = sqlite3.connect("storage/audit.db")
-            total = conn.execute("SELECT COUNT(*) FROM audit_log WHERE username = ?", 
-                               (self.username,)).fetchone()[0]
+            cursor = conn.execute("""
+                SELECT action, COUNT(*) FROM audit_log 
+                WHERE username = ? GROUP BY action
+            """, (self.username,))
+            stats = dict(cursor.fetchall())
+
+            total_files = conn.execute("""
+                SELECT COUNT(*) FROM user_files WHERE username = ? AND status = 'active'
+            """, (self.username,)).fetchone()[0]
             conn.close()
         except:
-            total = 0
+            stats = {}
+            total_files = 0
 
-        ctk.CTkLabel(stats, text=f"Total Activities: {total}", 
-                    font=("Inter", 16), text_color="#6366f1").pack(pady=10)
+        signed = stats.get("SIGN", 0) + stats.get("BATCH_SIGN", 0)
+        verified = stats.get("VERIFY", 0)
+        encrypted = stats.get("ENCRYPT", 0)
+        decrypted = stats.get("DECRYPT", 0)
+        hashed = stats.get("HASH", 0)
+        total_activities = sum(stats.values())
 
-        ctk.CTkButton(profile_frame, text="🔑 Change Password", width=200, height=40,
-                     font=("Inter", 14), fg_color="#6366f1", hover_color="#4f46e5",
-                     corner_radius=10, command=self.change_password).pack(pady=20)
+        stat_items = [
+            ("📝 Signed", signed, "#6366f1"),
+            ("✅ Verified", verified, "#10b981"),
+            ("🔐 Encrypted", encrypted, "#f59e0b"),
+            ("🔓 Decrypted", decrypted, "#ef4444"),
+            ("🔍 Hashed", hashed, "#ec4899"),
+            ("📁 Total Files", total_files, "#8b5cf6"),
+        ]
+
+        for label, value, color in stat_items:
+            row = ctk.CTkFrame(stats_card, fg_color="transparent")
+            row.pack(fill="x", padx=20, pady=3)
+            ctk.CTkLabel(row, text=label, font=("Inter", 12), 
+                        text_color="#94a3b8").pack(side="left")
+            ctk.CTkLabel(row, text=str(value), font=("Inter", 14, "bold"), 
+                        text_color=color).pack(side="right")
+
+        ctk.CTkFrame(stats_card, fg_color="#1e293b", height=1).pack(fill="x", padx=20, pady=(10, 10))
+
+        total_row = ctk.CTkFrame(stats_card, fg_color="transparent")
+        total_row.pack(fill="x", padx=20, pady=(0, 15))
+        ctk.CTkLabel(total_row, text="📈 Total Activities", font=("Inter", 13, "bold"), 
+                    text_color="#f8fafc").pack(side="left")
+        ctk.CTkLabel(total_row, text=str(total_activities), font=("Inter", 18, "bold"), 
+                    text_color="#6366f1").pack(side="right")
+
+        # ═══════════════════════════════════════════════════════
+        # MIDDLE SECTION: Security & Key Management
+        # ═══════════════════════════════════════════════════════
+        middle_section = ctk.CTkFrame(main_container, fg_color="transparent")
+        middle_section.pack(fill="x", pady=(0, 15))
+
+        # Security Card
+        security_card = ctk.CTkFrame(middle_section, fg_color="#111827", corner_radius=16)
+        security_card.pack(side="left", fill="both", expand=True, padx=(0, 10))
+
+        ctk.CTkLabel(security_card, text="🔐 Security Settings", 
+                    font=("Inter", 16, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(20, 15))
+
+        # Password section
+        pass_frame = ctk.CTkFrame(security_card, fg_color="#0a0e1a", corner_radius=10)
+        pass_frame.pack(fill="x", padx=20, pady=(0, 10))
+
+        ctk.CTkLabel(pass_frame, text="🔑 Password", 
+                    font=("Inter", 13, "bold"), text_color="#f8fafc").pack(anchor="w", padx=15, pady=(12, 5))
+        ctk.CTkLabel(pass_frame, text="Change your account password. Minimum 6 characters required.", 
+                    font=("Inter", 11), text_color="#64748b").pack(anchor="w", padx=15, pady=(0, 10))
+
+        ctk.CTkButton(pass_frame, text="🔐 Change Password", width=180, height=38,
+                     font=("Inter", 12, "bold"), fg_color="#6366f1", hover_color="#4f46e5",
+                     corner_radius=10, command=self.change_password).pack(anchor="w", padx=15, pady=(0, 12))
+
+        # Key Status section
+        key_frame = ctk.CTkFrame(security_card, fg_color="#0a0e1a", corner_radius=10)
+        key_frame.pack(fill="x", padx=20, pady=(0, 15))
+
+        ctk.CTkLabel(key_frame, text="🔑 Cryptographic Keys", 
+                    font=("Inter", 13, "bold"), text_color="#f8fafc").pack(anchor="w", padx=15, pady=(12, 5))
+
+        has_private = os.path.exists(f"storage/keystores/{self.username}_private.pem")
+        has_public = os.path.exists(f"storage/keystores/{self.username}_public.pem")
+        has_cert = os.path.exists(f"storage/certs/{self.username}_cert.pem")
+
+        key_statuses = [
+            ("Private Key", has_private, "#10b981", "#ef4444"),
+            ("Public Key", has_public, "#10b981", "#ef4444"),
+            ("Certificate", has_cert, "#10b981", "#ef4444"),
+        ]
+
+        for name, exists, ok_color, bad_color in key_statuses:
+            row = ctk.CTkFrame(key_frame, fg_color="transparent")
+            row.pack(fill="x", padx=15, pady=2)
+            ctk.CTkLabel(row, text=f"  {name}", font=("Inter", 11), 
+                        text_color="#94a3b8").pack(side="left")
+            status_text = "✅ Active" if exists else "❌ Missing"
+            status_color = ok_color if exists else bad_color
+            ctk.CTkLabel(row, text=status_text, font=("Inter", 11, "bold"), 
+                        text_color=status_color).pack(side="right")
+
+        if not has_private:
+            ctk.CTkButton(key_frame, text="⚙️ Setup Keys", width=150, height=35,
+                         font=("Inter", 12, "bold"), fg_color="#10b981", hover_color="#059669",
+                         corner_radius=10, command=self.setup_keys).pack(anchor="w", padx=15, pady=(8, 12))
+        else:
+            ctk.CTkButton(key_frame, text="👁 View Certificate", width=150, height=35,
+                         font=("Inter", 12), fg_color="#6366f1", hover_color="#4f46e5",
+                         corner_radius=10, command=lambda: self._view_cert_file(f"storage/certs/{self.username}_cert.pem")).pack(anchor="w", padx=15, pady=(8, 12))
+
+        # Storage Usage Card
+        storage_card = ctk.CTkFrame(middle_section, fg_color="#111827", corner_radius=16, width=320)
+        storage_card.pack(side="right", fill="y", padx=(10, 0))
+        storage_card.pack_propagate(False)
+
+        ctk.CTkLabel(storage_card, text="💾 Storage Usage", 
+                    font=("Inter", 16, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(20, 15))
+
+        # Calculate storage
+        storage_data = []
+        total_size = 0
+
+        for folder, label, color in [
+            (f"storage/signatures/{self.username}", "Signatures", "#6366f1"),
+            (f"storage/encrypted/{self.username}", "Encrypted", "#f59e0b"),
+            (f"storage/hash/{self.username}", "Hash Files", "#ec4899"),
+        ]:
+            size = 0
+            count = 0
+            if os.path.exists(folder):
+                for root, dirs, files in os.walk(folder):
+                    for file in files:
+                        fp = os.path.join(root, file)
+                        size += os.path.getsize(fp)
+                        count += 1
+            storage_data.append((label, count, size, color))
+            total_size += size
+
+        # Progress bar for total
+        ctk.CTkLabel(storage_card, text=f"Total: {self._format_size(total_size)}", 
+                    font=("Inter", 14, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20)
+
+        progress = ctk.CTkProgressBar(storage_card, width=280, height=8, 
+                                     fg_color="#0a0e1a", progress_color="#6366f1")
+        progress.pack(padx=20, pady=(5, 15))
+        progress.set(0.3 if total_size > 0 else 0)
+
+        for label, count, size, color in storage_data:
+            row = ctk.CTkFrame(storage_card, fg_color="transparent")
+            row.pack(fill="x", padx=20, pady=3)
+            ctk.CTkLabel(row, text=f"{label}", font=("Inter", 11), 
+                        text_color="#94a3b8").pack(side="left")
+            ctk.CTkLabel(row, text=f"{count} files · {self._format_size(size)}", 
+                        font=("Inter", 11), text_color=color).pack(side="right")
+
+        # ═══════════════════════════════════════════════════════
+        # BOTTOM SECTION: Danger Zone
+        # ═══════════════════════════════════════════════════════
+        danger_card = ctk.CTkFrame(main_container, fg_color="#111827", corner_radius=16)
+        danger_card.pack(fill="x", pady=(0, 15))
+
+        ctk.CTkLabel(danger_card, text="🚨 Danger Zone", 
+                    font=("Inter", 16, "bold"), text_color="#ef4444").pack(anchor="w", padx=20, pady=(20, 5))
+        ctk.CTkLabel(danger_card, text="These actions are irreversible. Please proceed with caution.", 
+                    font=("Inter", 11), text_color="#64748b").pack(anchor="w", padx=20, pady=(0, 15))
+
+        danger_actions = ctk.CTkFrame(danger_card, fg_color="transparent")
+        danger_actions.pack(fill="x", padx=20, pady=(0, 20))
+
+        ctk.CTkButton(danger_actions, text="📥 Export All My Data", width=180, height=40,
+                     font=("Inter", 12, "bold"), fg_color="#f59e0b", hover_color="#d97706",
+                     corner_radius=10, command=self.export_all_data).pack(side="left", padx=5)
+
+        ctk.CTkButton(danger_actions, text="🗑️ Delete My Account", width=180, height=40,
+                     font=("Inter", 12, "bold"), fg_color="#ef4444", hover_color="#dc2626",
+                     corner_radius=10, command=self.delete_my_account).pack(side="left", padx=5)
+
+    def export_all_data(self):
+        """Export all user data to a zip file"""
+        import zipfile
+        from datetime import datetime
+
+        export_dir = f"storage/exports/{self.username}"
+        os.makedirs(export_dir, exist_ok=True)
+
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        zip_path = f"{export_dir}/export_{timestamp}.zip"
+
+        try:
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                # Add audit logs
+                try:
+                    conn = sqlite3.connect("storage/audit.db")
+                    cursor = conn.execute("""
+                        SELECT * FROM audit_log WHERE username = ? ORDER BY timestamp DESC
+                    """, (self.username,))
+                    logs = cursor.fetchall()
+                    conn.close()
+
+                    import csv
+                    log_csv = f"{export_dir}/audit_logs.csv"
+                    with open(log_csv, 'w', newline='') as f:
+                        writer = csv.writer(f)
+                        writer.writerow(['ID', 'Timestamp', 'Username', 'Action', 'File', 'Hash', 'Result', 'Details', 'IP'])
+                        writer.writerows(logs)
+                    zipf.write(log_csv, "audit_logs.csv")
+                    os.remove(log_csv)
+                except:
+                    pass
+
+                # Add files
+                for folder in [
+                    f"storage/signatures/{self.username}",
+                    f"storage/encrypted/{self.username}",
+                    f"storage/hash/{self.username}",
+                ]:
+                    if os.path.exists(folder):
+                        for root, dirs, files in os.walk(folder):
+                            for file in files:
+                                file_path = os.path.join(root, file)
+                                arcname = os.path.relpath(file_path, "storage")
+                                zipf.write(file_path, arcname)
+
+                # Add certificate
+                cert_path = f"storage/certs/{self.username}_cert.pem"
+                if os.path.exists(cert_path):
+                    zipf.write(cert_path, f"certificate/{self.username}_cert.pem")
+
+            messagebox.showinfo("Export Complete", 
+                f"All your data exported to:\n{zip_path}\n\nIncludes: audit logs, files, and certificate.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Export failed: {str(e)}")
+
 
     def show_settings(self):
         self.header_title.configure(text="Settings")
@@ -1035,10 +1320,10 @@ class UserDashboard:
             auto_hash_path = os.path.join(user_hash_dir, f"{safe_name}_sha256.txt")
 
             with open(auto_hash_path, 'w') as hf:
-                hf.write("File: " + file_name + chr(10))
-                hf.write("SHA-256: " + file_hash + chr(10))
-                hf.write("Generated: " + datetime.now().isoformat() + chr(10))
-                hf.write("By User: " + self.username + chr(10))
+                hf.write("File: " + file_name + "\n")
+                hf.write("SHA-256: " + file_hash + "\n")
+                hf.write("Generated: " + datetime.now().isoformat() + "\n")
+                hf.write("By User: " + self.username + "\n")
 
             self.audit.add_user_file(
                 username=self.username,
@@ -1100,11 +1385,12 @@ class UserDashboard:
                 )
                 if save_path:
                     with open(save_path, 'w') as f:
-                        f.write("File: " + file_name + chr(10))
-                        f.write("SHA-256: " + file_hash + chr(10))
-                        f.write("Generated: " + datetime.now().isoformat() + chr(10))
+                        f.write("File: " + file_name + "\n")
+                        f.write("SHA-256: " + file_hash + "\n")
+                        f.write("Generated: " + datetime.now().isoformat() + "\n")
+                        f.write("By User: " + self.username + "\n")
 
-                    messagebox.showinfo("Saved", "Hash saved to:" + chr(10) + save_path, parent=hash_dialog)
+                    messagebox.showinfo("Saved", "Hash saved to: " + save_path, parent=hash_dialog)
 
             ctk.CTkButton(btn_frame, text="📋 Copy to Clipboard", width=180, height=38,
                          font=("Inter", 12, "bold"), fg_color="#6366f1", 
