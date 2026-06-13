@@ -26,7 +26,11 @@ class UserDashboard:
 
         self.root.title(f"CryptoSign - User Dashboard ({self.username})")
         self.root.geometry("1200x800")
-        self.root.configure(fg_color="#0f172a")
+        self.root.configure(fg_color="#0a0e1a")
+        self.root.minsize(1000, 700)
+
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("dark-blue")
 
         self.current_view = "dashboard"
         self.build_sidebar()
@@ -34,20 +38,21 @@ class UserDashboard:
         self.show_dashboard()
 
     def build_sidebar(self):
-        self.sidebar = ctk.CTkFrame(self.root, fg_color="#1e293b", width=250, corner_radius=0)
+        self.sidebar = ctk.CTkFrame(self.root, fg_color="#111827", width=260, corner_radius=0)
         self.sidebar.pack(side="left", fill="y")
         self.sidebar.pack_propagate(False)
 
-        logo_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent", height=80)
-        logo_frame.pack(fill="x", pady=(20, 10))
+        # Logo area
+        logo_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent", height=100)
+        logo_frame.pack(fill="x", pady=(30, 10))
 
-        ctk.CTkLabel(logo_frame, text="🔐", font=("Inter", 32)).pack()
-        ctk.CTkLabel(logo_frame, text="CryptoSign", font=("Inter", 16, "bold"), 
+        ctk.CTkLabel(logo_frame, text="🔐", font=("Inter", 40)).pack()
+        ctk.CTkLabel(logo_frame, text="CryptoSign", font=("Inter", 18, "bold"), 
                     text_color="#6366f1").pack()
-        ctk.CTkLabel(logo_frame, text="Digital Document Signing", 
-                    font=("Inter", 10), text_color="#64748b").pack()
+        ctk.CTkLabel(logo_frame, text="Secure Digital Document Signing", 
+                    font=("Inter", 11), text_color="#64748b").pack()
 
-        ctk.CTkFrame(self.sidebar, fg_color="#334155", height=1).pack(fill="x", padx=20, pady=10)
+        ctk.CTkFrame(self.sidebar, fg_color="#1e293b", height=1).pack(fill="x", padx=20, pady=15)
 
         self.menu_buttons = {}
 
@@ -62,50 +67,58 @@ class UserDashboard:
 
         for icon, text, view in menu_items:
             btn = ctk.CTkButton(self.sidebar, text=f"{icon}  {text}", 
-                               font=("Inter", 13), height=40,
-                               fg_color="transparent", hover_color="#334155",
+                               font=("Inter", 13), height=44,
+                               fg_color="transparent", hover_color="#1e293b",
                                text_color="#94a3b8", anchor="w",
-                               corner_radius=8, command=lambda v=view: self.switch_view(v))
-            btn.pack(fill="x", padx=10, pady=2)
+                               corner_radius=10, command=lambda v=view: self.switch_view(v))
+            btn.pack(fill="x", padx=12, pady=3)
             self.menu_buttons[view] = btn
 
-        ctk.CTkFrame(self.sidebar, fg_color="#334155", height=1).pack(fill="x", padx=20, pady=10)
+        ctk.CTkFrame(self.sidebar, fg_color="#1e293b", height=1).pack(fill="x", padx=20, pady=15)
 
-        ctk.CTkLabel(self.sidebar, text=f"👤 {self.username}", 
-                    font=("Inter", 12, "bold"), text_color="#f8fafc").pack(pady=5)
-        ctk.CTkLabel(self.sidebar, text="Standard User", 
-                    font=("Inter", 10), text_color="#64748b").pack()
+        # User info
+        user_frame = ctk.CTkFrame(self.sidebar, fg_color="#0a0e1a", corner_radius=10)
+        user_frame.pack(fill="x", padx=12, pady=10)
 
-        ctk.CTkButton(self.sidebar, text="🚪 Logout", 
-                     font=("Inter", 12, "bold"), height=40,
+        ctk.CTkLabel(user_frame, text=f"👤 {self.username}", 
+                    font=("Inter", 13, "bold"), text_color="#f8fafc").pack(pady=(10, 2))
+        ctk.CTkLabel(user_frame, text="Standard User", 
+                    font=("Inter", 11), text_color="#64748b").pack(pady=(0, 10))
+
+        ctk.CTkButton(self.sidebar, text="🚪  Logout", 
+                     font=("Inter", 13, "bold"), height=44,
                      fg_color="#ef4444", hover_color="#dc2626",
-                     text_color="white", corner_radius=8,
-                     command=self.logout).pack(fill="x", padx=10, pady=20)
+                     text_color="white", corner_radius=10,
+                     command=self.logout).pack(fill="x", padx=12, pady=20)
 
     def build_main_content(self):
-        self.main_content = ctk.CTkFrame(self.root, fg_color="#0f172a", corner_radius=0)
+        self.main_content = ctk.CTkFrame(self.root, fg_color="#0a0e1a", corner_radius=0)
         self.main_content.pack(side="right", fill="both", expand=True)
 
-        self.header = ctk.CTkFrame(self.main_content, fg_color="transparent", height=60)
+        self.header = ctk.CTkFrame(self.main_content, fg_color="transparent", height=70)
         self.header.pack(fill="x", padx=30, pady=(20, 10))
         self.header.pack_propagate(False)
 
         self.header_title = ctk.CTkLabel(self.header, text="Dashboard", 
-                                        font=("Inter", 24, "bold"), text_color="#f8fafc")
+                                        font=("Inter", 26, "bold"), text_color="#f8fafc")
         self.header_title.pack(side="left")
 
-        # ✅ REFRESH BUTTON
-        self.refresh_btn = ctk.CTkButton(self.header, text="🔄 Refresh", width=100, height=35,
+        # Refresh button
+        self.refresh_btn = ctk.CTkButton(self.header, text="🔄 Refresh", width=110, height=38,
                      font=("Inter", 12), fg_color="#6366f1", hover_color="#4f46e5",
-                     text_color="white", corner_radius=8,
+                     text_color="white", corner_radius=10,
                      command=self.refresh_current_view)
         self.refresh_btn.pack(side="right", padx=5)
 
-        ctk.CTkButton(self.header, text="🔔", width=40, height=40,
-                     font=("Inter", 16), fg_color="#1e293b", hover_color="#334155",
-                     text_color="#f59e0b", corner_radius=8).pack(side="right", padx=5)
+        ctk.CTkButton(self.header, text="🔔", width=42, height=42,
+                     font=("Inter", 16), fg_color="#111827", hover_color="#1e293b",
+                     text_color="#f59e0b", corner_radius=10).pack(side="right", padx=5)
 
-        # ✅ SCROLLABLE CONTENT FRAME
+        # Accent line
+        accent_line = ctk.CTkFrame(self.main_content, fg_color="#6366f1", height=2)
+        accent_line.pack(fill="x", padx=30, pady=(0, 15))
+
+        # Scrollable content
         self.content_scroll = ctk.CTkScrollableFrame(self.main_content, fg_color="transparent")
         self.content_scroll.pack(fill="both", expand=True, padx=30, pady=10)
 
@@ -115,10 +128,10 @@ class UserDashboard:
     def refresh_current_view(self):
         self.refresh_btn.configure(text="⏳ Refreshing...")
         self.root.update()
-        
+
         for widget in self.content_frame.winfo_children():
             widget.destroy()
-        
+
         if self.current_view == "dashboard":
             self.show_dashboard()
         elif self.current_view == "documents":
@@ -131,7 +144,7 @@ class UserDashboard:
             self.show_profile()
         elif self.current_view == "settings":
             self.show_settings()
-        
+
         self.refresh_btn.configure(text="🔄 Refresh")
         self.root.update()
 
@@ -169,16 +182,16 @@ class UserDashboard:
             self.show_setup_wizard()
             return
 
-        # Welcome
-        welcome = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
+        # Welcome card
+        welcome = ctk.CTkFrame(self.content_frame, fg_color="#111827", corner_radius=12)
         welcome.pack(fill="x", pady=(0, 20))
 
         ctk.CTkLabel(welcome, text=f"👋 Welcome back, {self.username}!", 
-                    font=("Inter", 20, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(15, 5))
+                    font=("Inter", 22, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(20, 5))
         ctk.CTkLabel(welcome, text="Here's your document signing overview", 
-                    font=("Inter", 12), text_color="#94a3b8").pack(anchor="w", padx=20, pady=(0, 15))
+                    font=("Inter", 13), text_color="#94a3b8").pack(anchor="w", padx=20, pady=(0, 20))
 
-        # Stats
+        # Stats cards
         stats_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
         stats_frame.pack(fill="x", pady=(0, 20))
 
@@ -200,14 +213,14 @@ class UserDashboard:
         self.create_stat_card(stats_frame, "🔓 Decrypted", str(stats.get("DECRYPT", 0)), "#ef4444")
 
         # Quick Actions
-        actions_frame = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
+        actions_frame = ctk.CTkFrame(self.content_frame, fg_color="#111827", corner_radius=12)
         actions_frame.pack(fill="x", pady=(0, 20))
 
         ctk.CTkLabel(actions_frame, text="⚡ Quick Actions", 
-                    font=("Inter", 16, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(15, 10))
+                    font=("Inter", 16, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(20, 15))
 
         grid = ctk.CTkFrame(actions_frame, fg_color="transparent")
-        grid.pack(fill="x", padx=20, pady=(0, 15))
+        grid.pack(fill="x", padx=20, pady=(0, 20))
 
         row1 = ctk.CTkFrame(grid, fg_color="transparent")
         row1.pack(fill="x", pady=5)
@@ -225,14 +238,14 @@ class UserDashboard:
         self.create_action_btn(row3, "🔍 File Hash", self.quick_hash, "#f59e0b")
 
         # Recent Activity
-        activity_frame = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
+        activity_frame = ctk.CTkFrame(self.content_frame, fg_color="#111827", corner_radius=12)
         activity_frame.pack(fill="x", pady=(0, 20))
 
         ctk.CTkLabel(activity_frame, text="📈 Recent Activity", 
-                    font=("Inter", 16, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(15, 10))
+                    font=("Inter", 16, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(20, 15))
 
-        scroll = ctk.CTkScrollableFrame(activity_frame, fg_color="transparent", height=200)
-        scroll.pack(fill="x", padx=20, pady=(0, 15))
+        scroll = ctk.CTkScrollableFrame(activity_frame, fg_color="transparent", height=220)
+        scroll.pack(fill="x", padx=20, pady=(0, 20))
 
         try:
             conn = sqlite3.connect("storage/audit.db")
@@ -257,17 +270,17 @@ class UserDashboard:
             self.show_setup_wizard()
             return
 
-        container = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
+        container = ctk.CTkFrame(self.content_frame, fg_color="#111827", corner_radius=12)
         container.pack(fill="both", expand=True, padx=20, pady=20)
 
         ctk.CTkLabel(container, text="📦 Batch Document Signing", 
                     font=("Inter", 24, "bold"), text_color="#f8fafc").pack(pady=(30, 10))
 
         ctk.CTkLabel(container, text="Sign multiple documents at once from a folder", 
-                    font=("Inter", 14), text_color="#94a3b8").pack(pady=(0, 20))
+                    font=("Inter", 14), text_color="#94a3b8").pack(pady=(0, 25))
 
         # Settings Frame
-        settings_frame = ctk.CTkFrame(container, fg_color="#0f172a", corner_radius=10)
+        settings_frame = ctk.CTkFrame(container, fg_color="#0a0e1a", corner_radius=10)
         settings_frame.pack(fill="x", padx=40, pady=10)
 
         mode_frame = ctk.CTkFrame(settings_frame, fg_color="transparent")
@@ -277,12 +290,12 @@ class UserDashboard:
                     font=("Inter", 13, "bold"), text_color="#f8fafc").pack(side="left", padx=(0, 15))
 
         self.batch_mode = ctk.StringVar(value="external")
-        
+
         ctk.CTkRadioButton(mode_frame, text="External (.sig file)", 
                           variable=self.batch_mode, value="external",
                           font=("Inter", 12), text_color="#f8fafc",
                           fg_color="#6366f1").pack(side="left", padx=10)
-        
+
         ctk.CTkRadioButton(mode_frame, text="Embedded (PDF only)", 
                           variable=self.batch_mode, value="embedded",
                           font=("Inter", 12), text_color="#f8fafc",
@@ -316,15 +329,15 @@ class UserDashboard:
         folder_frame.pack(fill="x", padx=40, pady=15)
 
         self.folder_path_var = ctk.StringVar(value="")
-        
+
         ctk.CTkEntry(folder_frame, textvariable=self.folder_path_var,
-                    width=500, height=40, font=("Inter", 12),
-                    fg_color="#0f172a", border_color="#334155",
+                    width=500, height=44, font=("Inter", 12),
+                    fg_color="#0a0e1a", border_color="#1e293b",
                     text_color="#f8fafc", placeholder_text="Select folder...").pack(side="left", padx=(0, 10))
 
-        ctk.CTkButton(folder_frame, text="📁 Browse", width=100, height=40,
+        ctk.CTkButton(folder_frame, text="📁 Browse", width=110, height=44,
                      font=("Inter", 12), fg_color="#6366f1", 
-                     hover_color="#4f46e5", corner_radius=8,
+                     hover_color="#4f46e5", corner_radius=10,
                      command=self.browse_batch_folder).pack(side="left")
 
         self.progress_frame = ctk.CTkFrame(container, fg_color="transparent")
@@ -335,7 +348,7 @@ class UserDashboard:
         self.progress_label.pack(pady=5)
 
         self.progress_bar = ctk.CTkProgressBar(self.progress_frame, width=600, height=20,
-                                            fg_color="#0f172a", progress_color="#6366f1")
+                                            fg_color="#0a0e1a", progress_color="#6366f1")
         self.progress_bar.pack(pady=5)
         self.progress_bar.set(0)
 
@@ -344,7 +357,7 @@ class UserDashboard:
         self.batch_result_label.pack(pady=10)
 
         btn_frame = ctk.CTkFrame(container, fg_color="transparent")
-        btn_frame.pack(pady=20)
+        btn_frame.pack(pady=25)
 
         ctk.CTkButton(btn_frame, text="🚀 Start Batch Sign", width=200, height=50,
                      font=("Inter", 16, "bold"), fg_color="#10b981", 
@@ -382,7 +395,7 @@ class UserDashboard:
 
     def execute_batch_sign(self):
         folder_path = self.folder_path_var.get()
-        
+
         if not folder_path:
             messagebox.showerror("Error", "Please select a folder first!")
             return
@@ -470,14 +483,14 @@ class UserDashboard:
             self.audit.log(self.username, "BATCH_SIGN", "FAILED", details=str(e))
 
     def show_setup_wizard(self):
-        wizard = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
+        wizard = ctk.CTkFrame(self.content_frame, fg_color="#111827", corner_radius=12)
         wizard.pack(fill="both", expand=True, padx=50, pady=50)
 
         ctk.CTkLabel(wizard, text="🔐 Welcome to CryptoSign!", 
                     font=("Inter", 24, "bold"), text_color="#f8fafc").pack(pady=(30, 10))
 
         ctk.CTkLabel(wizard, text="You need to set up your cryptographic keys to start signing documents.", 
-                    font=("Inter", 14), text_color="#94a3b8").pack(pady=(0, 20))
+                    font=("Inter", 14), text_color="#94a3b8").pack(pady=(0, 25))
 
         features = ctk.CTkFrame(wizard, fg_color="transparent")
         features.pack(pady=20)
@@ -519,7 +532,7 @@ class UserDashboard:
             self.audit.log(self.username, "SETUP", "FAILED", details=str(e))
 
     def create_stat_card(self, parent, title, value, color):
-        card = ctk.CTkFrame(parent, fg_color="#1e293b", corner_radius=12, width=250)
+        card = ctk.CTkFrame(parent, fg_color="#111827", corner_radius=12, width=250)
         card.pack(side="left", expand=True, fill="both", padx=5, pady=5)
 
         ctk.CTkLabel(card, text=title, font=("Inter", 12), 
@@ -531,12 +544,12 @@ class UserDashboard:
         btn = ctk.CTkButton(parent, text=text, width=300, height=50,
                            font=("Inter", 14, "bold"), fg_color=color,
                            hover_color="#4f46e5" if color == "#6366f1" else "#059669" if color == "#10b981" else "#d97706" if color == "#f59e0b" else "#dc2626",
-                           text_color="#ffffff", corner_radius=12, command=command)
+                           text_color="#ffffff", corner_radius=10, command=command)
         btn.pack(side="left", padx=8, expand=True, fill="x")
         return btn
 
     def create_activity_item(self, parent, action, file_name, result, time):
-        frame = ctk.CTkFrame(parent, fg_color="#0f172a", corner_radius=8)
+        frame = ctk.CTkFrame(parent, fg_color="#0a0e1a", corner_radius=8)
         frame.pack(fill="x", pady=3)
 
         icons = {"SIGN": "📝", "VERIFY": "✅", "ENCRYPT": "🔐", "DECRYPT": "🔓", "HASH": "🔍", "SETUP": "⚙️", "BATCH_SIGN": "📦"}
@@ -555,36 +568,28 @@ class UserDashboard:
         ctk.CTkLabel(frame, text=time[:10], 
                     font=("Inter", 10), text_color="#64748b").pack(side="right", padx=10)
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # ✅ MY DOCUMENTS - UPDATED WITH DECRYPTED & HASH FILES
-    # ═══════════════════════════════════════════════════════════════════════
     def show_documents(self):
         self.header_title.configure(text="My Documents")
 
-        # Get files from database
         signed_files = self.audit.get_user_files(self.username, 'signed')
         encrypted_files = self.audit.get_user_files(self.username, 'encrypted')
-
-        # Scan directories for all file types
         signed_files += self._scan_signed_files()
         encrypted_files += self._scan_encrypted_files()
         decrypted_files = self._scan_decrypted_files()
         hash_files = self._scan_hash_files()
 
-        # ✅ ALL DOCUMENT SECTIONS WITH SCROLLABLE
         doc_types = [
             ("📝 Signed Documents", signed_files, "#6366f1", "signed"),
             ("🔐 Encrypted Files", encrypted_files, "#f59e0b", "encrypted"),
-            ("🔓 Decrypted Files", decrypted_files, "#8b5cf6", "decrypted"),  # ✅ NEW
-            ("🔍 Hash Files", hash_files, "#ec4899", "hash"),  # ✅ NEW
+            ("🔓 Decrypted Files", decrypted_files, "#8b5cf6", "decrypted"),
+            ("🔍 Hash Files", hash_files, "#ec4899", "hash"),
             ("🏛 Certificates", self._get_cert_files(), "#10b981", "cert"),
         ]
 
         for title, files, color, ftype in doc_types:
-            frame = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
+            frame = ctk.CTkFrame(self.content_frame, fg_color="#111827", corner_radius=12)
             frame.pack(fill="x", pady=10)
 
-            # Header with count
             header = ctk.CTkFrame(frame, fg_color="transparent")
             header.pack(fill="x", padx=20, pady=(15, 10))
 
@@ -595,7 +600,6 @@ class UserDashboard:
                                       font=("Inter", 11), text_color="#64748b")
             count_badge.pack(side="right")
 
-            # ✅ SCROLLABLE FILE LIST
             scroll = ctk.CTkScrollableFrame(frame, fg_color="transparent", height=180)
             scroll.pack(fill="x", padx=20, pady=(0, 15))
 
@@ -603,11 +607,10 @@ class UserDashboard:
                 ctk.CTkLabel(scroll, text="No files found", 
                             font=("Inter", 11), text_color="#64748b").pack(pady=20)
             else:
-                for file_info in files[:10]:  # Show max 10
+                for file_info in files[:10]:
                     self.create_file_item(scroll, file_info, ftype)
 
     def _scan_signed_files(self):
-        """Scan directories for signed files not in database"""
         files = []
         sig_dir = f"storage/signatures/{self.username}"
         if os.path.exists(sig_dir):
@@ -632,7 +635,6 @@ class UserDashboard:
         return files
 
     def _scan_encrypted_files(self):
-        """Scan directories for encrypted files not in database"""
         files = []
         enc_dir = f"storage/encrypted/{self.username}"
         if os.path.exists(enc_dir):
@@ -646,14 +648,12 @@ class UserDashboard:
 
         return files
 
-    # ✅ NEW: SCAN DECRYPTED FILES
     def _scan_decrypted_files(self):
-        """Scan directories for decrypted files"""
         files = []
         dec_dir = f"storage/encrypted/{self.username}/decrypted"
         if os.path.exists(dec_dir):
             for f in os.listdir(dec_dir):
-                if not f.startswith('.'):  # Skip hidden files
+                if not f.startswith('.'):
                     fpath = os.path.join(dec_dir, f)
                     if os.path.isfile(fpath):
                         files.append((
@@ -663,13 +663,10 @@ class UserDashboard:
 
         return files
 
-    # ✅ NEW: SCAN HASH FILES
     def _scan_hash_files(self):
-        """Scan for saved hash files in all possible locations + database"""
         files = []
         seen_paths = set()
 
-        # ✅ GET HASH FILES FROM DATABASE (tracked via add_user_file)
         db_files = self.audit.get_user_files(self.username, 'hash')
         for file_info in db_files:
             timestamp, file_type, file_path, original_name, file_size, status = file_info
@@ -677,7 +674,6 @@ class UserDashboard:
                 seen_paths.add(file_path)
                 files.append(file_info)
 
-        # ✅ PRIMARY: Auto-saved hash directory (like other operations)
         user_hash_dir = f"storage/hash/{self.username}"
         if os.path.exists(user_hash_dir):
             try:
@@ -693,7 +689,6 @@ class UserDashboard:
             except:
                 pass
 
-        # Fallback: Check other possible locations
         hash_dirs = [
             "storage",
             f"storage/{self.username}",
@@ -720,7 +715,6 @@ class UserDashboard:
         return files
 
     def _get_cert_files(self):
-        """Get certificate files"""
         files = []
         cert_path = f"storage/certs/{self.username}_cert.pem"
         if os.path.exists(cert_path) and os.path.isfile(cert_path):
@@ -732,55 +726,46 @@ class UserDashboard:
         return files
 
     def create_file_item(self, parent, file_info, ftype):
-        """Create file row with working buttons"""
         timestamp, file_type, file_path, original_name, file_size, status = file_info
 
-        frame = ctk.CTkFrame(parent, fg_color="#0f172a", corner_radius=6)
+        frame = ctk.CTkFrame(parent, fg_color="#0a0e1a", corner_radius=8)
         frame.pack(fill="x", pady=2)
 
-        # File icon based on type
         icons = {
             "signed": "📝", 
             "encrypted": "🔐", 
-            "decrypted": "🔓",  # ✅ NEW
-            "hash": "🔍",  # ✅ NEW
+            "decrypted": "🔓",
+            "hash": "🔍",
             "cert": "🏛"
         }
         icon = icons.get(ftype, "📄")
 
-        # File name (truncated if too long)
         display_name = original_name[:40] + "..." if len(original_name) > 40 else original_name
 
         ctk.CTkLabel(frame, text=f"{icon} {display_name}", 
                     font=("Inter", 11), text_color="#f8fafc").pack(side="left", padx=15, pady=8)
 
-        # File size
         size_str = self._format_size(file_size)
         ctk.CTkLabel(frame, text=size_str, 
                     font=("Inter", 10), text_color="#64748b").pack(side="left", padx=5)
 
-        # Action buttons
         actions = ctk.CTkFrame(frame, fg_color="transparent")
         actions.pack(side="right", padx=10)
 
-        # View/Open button - "View" for cert, "Open" for others
         btn_text = "👁 View" if ftype == "cert" else "👁 Open"
         ctk.CTkButton(actions, text=btn_text, width=60, height=25,
                      font=("Inter", 10), fg_color="#6366f1", hover_color="#4f46e5",
                      corner_radius=6, command=lambda p=file_path: self._open_file(p)).pack(side="left", padx=2)
 
-        # Download/Copy button
         ctk.CTkButton(actions, text="⬇ Save As", width=70, height=25,
                      font=("Inter", 10), fg_color="#10b981", hover_color="#059669",
                      corner_radius=6, command=lambda p=file_path, n=original_name: self._save_file_as(p, n)).pack(side="left", padx=2)
 
-        # Delete button
         ctk.CTkButton(actions, text="🗑", width=30, height=25,
                      font=("Inter", 10), fg_color="#ef4444", hover_color="#dc2626",
                      corner_radius=6, command=lambda p=file_path, f=frame: self._delete_file(p, f)).pack(side="left", padx=2)
 
     def _format_size(self, size):
-        """Format file size"""
         if size < 1024:
             return f"{size} B"
         elif size < 1024 * 1024:
@@ -789,20 +774,18 @@ class UserDashboard:
             return f"{size/(1024*1024):.1f} MB"
 
     def _open_file(self, file_path):
-        """Open file with default application"""
         if not os.path.exists(file_path):
             messagebox.showerror("Error", f"File not found!\n{file_path}")
             return
 
-        # If it's a certificate, show in viewer dialog
         if file_path.endswith('.pem') or file_path.endswith('.crt') or file_path.endswith('.cert'):
             self._view_cert_file(file_path)
             return
 
         try:
-            if os.name == 'nt':  # Windows
+            if os.name == 'nt':
                 os.startfile(file_path)
-            elif os.name == 'posix':  # macOS/Linux
+            elif os.name == 'posix':
                 import subprocess
                 subprocess.run(['xdg-open', file_path], check=True)
             messagebox.showinfo("Open", f"Opening: {os.path.basename(file_path)}")
@@ -810,7 +793,6 @@ class UserDashboard:
             messagebox.showerror("Error", f"Could not open file: {str(e)}")
 
     def _view_cert_file(self, cert_path):
-        """View certificate file content in a dialog"""
         if not os.path.exists(cert_path):
             messagebox.showerror("Error", f"Certificate not found!\n{cert_path}")
             return
@@ -822,12 +804,11 @@ class UserDashboard:
             dialog = ctk.CTkToplevel(self.root)
             dialog.title(f"Certificate - {os.path.basename(cert_path)}")
             dialog.geometry("650x450")
-            dialog.configure(fg_color="#0f172a")
+            dialog.configure(fg_color="#0a0e1a")
             dialog.resizable(False, False)
             dialog.transient(self.root)
             dialog.grab_set()
 
-            # Center dialog
             dialog.update_idletasks()
             x = (dialog.winfo_screenwidth() - 650) // 2
             y = (dialog.winfo_screenheight() - 450) // 2
@@ -840,7 +821,7 @@ class UserDashboard:
                         font=("Inter", 12), text_color="#94a3b8").pack(pady=(0, 10))
 
             text_box = ctk.CTkTextbox(dialog, width=600, height=320, font=("Courier", 10),
-                                      fg_color="#1e293b", text_color="#f8fafc")
+                                      fg_color="#111827", text_color="#f8fafc")
             text_box.pack(pady=10)
             text_box.insert("1.0", content)
             text_box.configure(state="disabled")
@@ -853,7 +834,6 @@ class UserDashboard:
             messagebox.showerror("Error", f"Could not read certificate: {str(e)}")
 
     def _save_file_as(self, file_path, original_name):
-        """Save file to user chosen location"""
         if not os.path.exists(file_path):
             messagebox.showerror("Error", "File not found!")
             return
@@ -873,31 +853,24 @@ class UserDashboard:
                 messagebox.showerror("Error", f"Could not save file: {str(e)}")
 
     def _delete_file(self, file_path, frame_widget):
-        """Delete file with confirmation and empty folder cleanup"""
         if messagebox.askyesno("Confirm Delete", f"Delete {os.path.basename(file_path)}?"):
             try:
-                # Mark as deleted in database
                 self.audit.delete_user_file(self.username, file_path)
 
-                # Actually delete file
                 if os.path.exists(file_path):
                     os.remove(file_path)
 
-                    # Clean up empty parent folder
                     parent_dir = os.path.dirname(file_path)
                     if os.path.exists(parent_dir) and not os.listdir(parent_dir):
                         os.rmdir(parent_dir)
                         print(f"✅ Removed empty folder: {parent_dir}")
 
-                        # Also check grandparent (user folder) if it becomes empty
                         grandparent = os.path.dirname(parent_dir)
                         if os.path.exists(grandparent) and not os.listdir(grandparent):
                             os.rmdir(grandparent)
                             print(f"✅ Removed empty user folder: {grandparent}")
 
-                # Remove from UI
                 frame_widget.destroy()
-
                 messagebox.showinfo("Deleted", "File deleted successfully")
             except Exception as e:
                 messagebox.showerror("Error", f"Could not delete: {str(e)}")
@@ -908,14 +881,14 @@ class UserDashboard:
         toolbar = ctk.CTkFrame(self.content_frame, fg_color="transparent")
         toolbar.pack(fill="x", pady=(0, 15))
 
-        ctk.CTkButton(toolbar, text="📥 Export My Logs", width=150, height=35,
+        ctk.CTkButton(toolbar, text="📥 Export My Logs", width=150, height=38,
                      font=("Inter", 12), fg_color="#6366f1", hover_color="#4f46e5",
-                     corner_radius=8, command=self.export_my_logs).pack(side="right")
+                     corner_radius=10, command=self.export_my_logs).pack(side="right")
 
-        table_frame = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
+        table_frame = ctk.CTkFrame(self.content_frame, fg_color="#111827", corner_radius=12)
         table_frame.pack(fill="both", expand=True)
 
-        headers = ctk.CTkFrame(table_frame, fg_color="#334155", corner_radius=8)
+        headers = ctk.CTkFrame(table_frame, fg_color="#1e293b", corner_radius=8)
         headers.pack(fill="x", padx=20, pady=15)
 
         for col, width in [("Time", 150), ("Action", 120), ("File", 200), ("Result", 100), ("Details", 300)]:
@@ -942,7 +915,7 @@ class UserDashboard:
     def create_log_row(self, parent, log):
         id, timestamp, username, action, file_name, file_hash, result, details, ip = log
 
-        row = ctk.CTkFrame(parent, fg_color="#0f172a", corner_radius=6)
+        row = ctk.CTkFrame(parent, fg_color="#0a0e1a", corner_radius=6)
         row.pack(fill="x", pady=2)
 
         ctk.CTkLabel(row, text=timestamp[:19], font=("Courier", 10), 
@@ -961,7 +934,7 @@ class UserDashboard:
     def show_profile(self):
         self.header_title.configure(text="My Profile")
 
-        profile_frame = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
+        profile_frame = ctk.CTkFrame(self.content_frame, fg_color="#111827", corner_radius=12)
         profile_frame.pack(fill="both", expand=True)
 
         info = ctk.CTkFrame(profile_frame, fg_color="transparent")
@@ -994,7 +967,7 @@ class UserDashboard:
     def show_settings(self):
         self.header_title.configure(text="Settings")
 
-        settings_frame = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
+        settings_frame = ctk.CTkFrame(self.content_frame, fg_color="#111827", corner_radius=12)
         settings_frame.pack(fill="both", expand=True)
 
         ctk.CTkLabel(settings_frame, text="⚙️ Application Settings", 
@@ -1019,8 +992,7 @@ class UserDashboard:
         self.notifications = ctk.BooleanVar(value=True)
         ctk.CTkSwitch(notif_frame, variable=self.notifications).pack(side="right")
 
-        # Danger Zone - Delete Account
-        danger_frame = ctk.CTkFrame(settings_frame, fg_color="#0f172a", corner_radius=10)
+        danger_frame = ctk.CTkFrame(settings_frame, fg_color="#0a0e1a", corner_radius=10)
         danger_frame.pack(fill="x", padx=30, pady=(30, 10))
 
         ctk.CTkLabel(danger_frame, text="🚨 Danger Zone", 
@@ -1040,7 +1012,6 @@ class UserDashboard:
             ctk.set_appearance_mode("light")
 
     def quick_hash(self):
-        """Calculate SHA-256 hash of selected file - auto-saves to user hash directory"""
         file = filedialog.askopenfilename(
             title="Select file to calculate hash",
             filetypes=[("All Files", "*.*"), ("PDF Files", "*.pdf"), 
@@ -1054,15 +1025,12 @@ class UserDashboard:
         try:
             from core.hash_engine import generate_hash
 
-            # Calculate hash
             file_hash = generate_hash(file)
             file_name = os.path.basename(file)
 
-            # ✅ AUTO-SAVE: Create user hash directory and save hash automatically
             user_hash_dir = f"storage/hash/{self.username}"
             os.makedirs(user_hash_dir, exist_ok=True)
 
-            # Auto-save hash file (like other operations auto-save their outputs)
             safe_name = file_name.replace(" ", "_")
             auto_hash_path = os.path.join(user_hash_dir, f"{safe_name}_sha256.txt")
 
@@ -1072,7 +1040,6 @@ class UserDashboard:
                 hf.write("Generated: " + datetime.now().isoformat() + chr(10))
                 hf.write("By User: " + self.username + chr(10))
 
-            # ✅ TRACK IN DATABASE (auto-tracked, no need for manual save)
             self.audit.add_user_file(
                 username=self.username,
                 file_type='hash',
@@ -1083,45 +1050,38 @@ class UserDashboard:
 
             print(f"✅ Hash auto-saved to: {auto_hash_path}")
 
-            # Create hash display dialog
             hash_dialog = ctk.CTkToplevel(self.root)
             hash_dialog.title("🔍 SHA-256 File Hash")
             hash_dialog.geometry("700x320")
-            hash_dialog.configure(fg_color="#0f172a")
+            hash_dialog.configure(fg_color="#0a0e1a")
             hash_dialog.resizable(False, False)
             hash_dialog.transient(self.root)
             hash_dialog.grab_set()
 
-            # Center dialog
             hash_dialog.update_idletasks()
             x = (hash_dialog.winfo_screenwidth() - 700) // 2
             y = (hash_dialog.winfo_screenheight() - 320) // 2
             hash_dialog.geometry(f"+{x}+{y}")
 
-            # Title
             ctk.CTkLabel(hash_dialog, text="🔍 SHA-256 File Hash", 
                         font=("Inter", 20, "bold"), text_color="#f59e0b").pack(pady=(20, 5))
 
-            # File info
             ctk.CTkLabel(hash_dialog, text=f"📄 {file_name}", 
                         font=("Inter", 12), text_color="#94a3b8").pack(pady=(0, 10))
 
-            # Auto-saved info
             ctk.CTkLabel(hash_dialog, text=f"✅ Auto-saved to: {auto_hash_path}", 
                         font=("Inter", 11), text_color="#10b981").pack(pady=(0, 10))
 
-            # Hash display
-            hash_frame = ctk.CTkFrame(hash_dialog, fg_color="#1e293b", corner_radius=10)
+            hash_frame = ctk.CTkFrame(hash_dialog, fg_color="#111827", corner_radius=10)
             hash_frame.pack(fill="x", padx=30, pady=10)
 
             hash_entry = ctk.CTkEntry(hash_frame, width=620, height=42, font=("Courier", 13),
-                                       fg_color="#0f172a", border_color="#334155",
+                                       fg_color="#0a0e1a", border_color="#1e293b",
                                        text_color="#f8fafc", corner_radius=8)
             hash_entry.insert(0, file_hash)
             hash_entry.pack(padx=15, pady=15)
             hash_entry.configure(state="readonly")
 
-            # Buttons frame
             btn_frame = ctk.CTkFrame(hash_dialog, fg_color="transparent")
             btn_frame.pack(pady=15)
 
@@ -1132,7 +1092,6 @@ class UserDashboard:
                 messagebox.showinfo("Copied", "Hash copied to clipboard!", parent=hash_dialog)
 
             def save_hash_to_file():
-                # Allow user to save additional copy anywhere
                 save_path = filedialog.asksaveasfilename(
                     defaultextension=".txt",
                     initialfile=f"{file_name}_sha256.txt",
@@ -1162,13 +1121,11 @@ class UserDashboard:
                          hover_color="#475569", corner_radius=8,
                          command=hash_dialog.destroy).pack(side="left", padx=8)
 
-            # Log to audit
             self.audit.log(self.username, "HASH", "SUCCESS", 
                           file_name=file_name, 
                           file_hash=file_hash[:16],
                           details=f"File: {file_name}, Auto-saved: {auto_hash_path}")
 
-            # ✅ AUTO REFRESH DASHBOARD
             self.show_dashboard()
 
         except Exception as e:
@@ -1177,9 +1134,7 @@ class UserDashboard:
                           file_name=os.path.basename(file), 
                           details=str(e))
 
-
     def quick_sign(self):
-        """Open sign dialog with mode selection"""
         if not os.path.exists(f"storage/keystores/{self.username}_private.pem"):
             messagebox.showerror("🔐 Keys Not Found", 
                 "Please complete Setup Wizard first!")
@@ -1188,39 +1143,33 @@ class UserDashboard:
         self.show_sign_dialog()
 
     def show_sign_dialog(self):
-        """Sign document popup with mode selection"""
-        # Reset variables
         self.sign_mode.set("external")
         self.sign_file_path.set("")
 
         dialog = ctk.CTkToplevel(self.root)
         dialog.title("📝 Sign Document")
         dialog.geometry("520x500")
-        dialog.configure(fg_color="#0f172a")
+        dialog.configure(fg_color="#0a0e1a")
         dialog.resizable(False, False)
         dialog.transient(self.root)
         dialog.grab_set()
 
-        # Center
         dialog.update_idletasks()
         x = (dialog.winfo_screenwidth() - 520) // 2
         y = (dialog.winfo_screenheight() - 500) // 2
         dialog.geometry(f"+{x}+{y}")
 
-        # Title
         ctk.CTkLabel(dialog, text="📝 Sign Document", 
                     font=("Inter", 22, "bold"), text_color="#f8fafc").pack(pady=(20, 5))
         ctk.CTkLabel(dialog, text="Choose mode and select file", 
                     font=("Inter", 12), text_color="#94a3b8").pack(pady=(0, 15))
 
-        # Mode Selection
-        mode_frame = ctk.CTkFrame(dialog, fg_color="#1e293b", corner_radius=12)
+        mode_frame = ctk.CTkFrame(dialog, fg_color="#111827", corner_radius=12)
         mode_frame.pack(fill="x", padx=25, pady=10)
 
         ctk.CTkLabel(mode_frame, text="Signature Mode", 
                     font=("Inter", 12, "bold"), text_color="#f8fafc").pack(anchor="w", padx=15, pady=(10, 5))
 
-        # External
         ext_frame = ctk.CTkFrame(mode_frame, fg_color="transparent")
         ext_frame.pack(fill="x", padx=15, pady=3)
         ctk.CTkRadioButton(ext_frame, text="", variable=self.sign_mode, 
@@ -1231,7 +1180,6 @@ class UserDashboard:
         ctk.CTkLabel(ext_frame, text="Separate signature file", 
                     font=("Inter", 10), text_color="#64748b").pack(side="left")
 
-        # Embedded
         emb_frame = ctk.CTkFrame(mode_frame, fg_color="transparent")
         emb_frame.pack(fill="x", padx=15, pady=3)
         ctk.CTkRadioButton(emb_frame, text="", variable=self.sign_mode, 
@@ -1242,14 +1190,13 @@ class UserDashboard:
         ctk.CTkLabel(emb_frame, text="Sign inside PDF with visual stamp", 
                     font=("Inter", 10), text_color="#64748b").pack(side="left")
 
-        # File Selection
         file_frame = ctk.CTkFrame(dialog, fg_color="transparent")
         file_frame.pack(fill="x", padx=25, pady=15)
 
         ctk.CTkEntry(file_frame, textvariable=self.sign_file_path, 
                     width=300, height=40,
-                    font=("Inter", 11), fg_color="#1e293b", 
-                    border_color="#334155",
+                    font=("Inter", 11), fg_color="#111827", 
+                    border_color="#1e293b",
                     text_color="#f8fafc", 
                     placeholder_text="Select file...").pack(side="left", padx=(0, 10))
 
@@ -1258,7 +1205,6 @@ class UserDashboard:
                      hover_color="#4f46e5", corner_radius=8,
                      command=lambda: self.browse_sign_file(dialog)).pack(side="left")
 
-        # SIGN BUTTON
         sign_frame = ctk.CTkFrame(dialog, fg_color="transparent")
         sign_frame.pack(pady=20)
 
@@ -1273,7 +1219,6 @@ class UserDashboard:
                      command=dialog.destroy).pack(pady=5)
 
     def browse_sign_file(self, dialog):
-        """Browse for file based on selected mode"""
         mode = self.sign_mode.get()
 
         if mode == "embedded":
@@ -1295,11 +1240,9 @@ class UserDashboard:
             self.sign_file_path.set(file)
 
     def execute_sign(self, dialog):
-        """Execute signing based on mode"""
         file_path = self.sign_file_path.get()
         mode = self.sign_mode.get()
 
-        # Validation
         if not file_path:
             messagebox.showerror("Error", "Please select a file!", parent=dialog)
             return
@@ -1327,12 +1270,10 @@ class UserDashboard:
                           details=f"Mode: {mode}, Error: {str(e)}")
 
     def _sign_external(self, file_path, dialog):
-        """External mode - create .sig file"""
         from core.smart_sign import smart_sign
 
         result = smart_sign(file_path, self.username, "external", None, audit_logger=self.audit)
 
-        # Handle different return types
         if isinstance(result, dict):
             if not result.get('success', False):
                 raise Exception(result.get('message', 'Signing failed'))
@@ -1340,7 +1281,6 @@ class UserDashboard:
         else:
             sig_path = os.path.splitext(file_path)[0] + ".sig"
 
-        # Verify .sig was created
         if not os.path.exists(sig_path):
             sig_path = os.path.splitext(file_path)[0] + ".sig"
 
@@ -1356,16 +1296,13 @@ class UserDashboard:
             parent=dialog)
 
         dialog.destroy()
-        # ✅ AUTO REFRESH DASHBOARD
         self.show_dashboard()
 
     def _sign_embedded(self, file_path, dialog):
-        """Embedded mode - sign inside PDF with visual stamp"""
         from core.embed_pdf import embed_pdf_signature
 
         output_path = embed_pdf_signature(file_path, self.username, None, audit_logger=self.audit)
 
-        # If function doesn't return path, construct it
         if not output_path:
             output_path = file_path.replace(".pdf", "_signed.pdf")
 
@@ -1382,7 +1319,6 @@ class UserDashboard:
             parent=dialog)
 
         dialog.destroy()
-        # ✅ AUTO REFRESH DASHBOARD
         self.show_dashboard()
 
     def quick_verify(self):
@@ -1397,7 +1333,6 @@ class UserDashboard:
                 result = verify_document(file, f"storage/keystores/{self.username}_public.pem", self.username)
                 messagebox.showinfo("Verify", f"Result: {result}")
                 self.audit.log(self.username, "VERIFY", result, file_name=os.path.basename(file))
-                # ✅ AUTO REFRESH
                 self.show_dashboard()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
@@ -1414,7 +1349,6 @@ class UserDashboard:
                 public_key = f"storage/keystores/{self.username}_public.pem"
                 enc_path = encrypt_file(file, public_key, self.username)
 
-                # Track in database
                 self.audit.add_user_file(
                     username=self.username,
                     file_type='encrypted',
@@ -1425,13 +1359,11 @@ class UserDashboard:
 
                 messagebox.showinfo("Encrypt", f"File encrypted successfully!\n\nSaved to: {enc_path}")
                 self.audit.log(self.username, "ENCRYPT", "SUCCESS", file_name=os.path.basename(file))
-                # ✅ AUTO REFRESH DASHBOARD
                 self.show_dashboard()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
     def quick_decrypt(self):
-        """Decrypt encrypted file with proper file dialog and output path"""
         if not os.path.exists(f"storage/keystores/{self.username}_private.pem"):
             messagebox.showerror("Error", "Please setup your keys first!")
             return
@@ -1453,7 +1385,6 @@ class UserDashboard:
 
             output_path = decrypt_file(self.username, file, "")
 
-            # ✅ TRACK DECRYPTED FILE
             self.audit.add_user_file(
                 username=self.username,
                 file_type='decrypted',
@@ -1480,7 +1411,6 @@ class UserDashboard:
                 details=f"Output: {os.path.basename(output_path)}"
             )
 
-            # ✅ AUTO REFRESH DASHBOARD
             self.show_dashboard()
 
         except Exception as e:
@@ -1528,29 +1458,25 @@ class UserDashboard:
             messagebox.showinfo("Export Complete", f"Logs saved to:\n{filepath}")
         except Exception as e:
             messagebox.showerror("Error", str(e))
-    
+
     def logout(self):
         if messagebox.askyesno("Logout", "Are you sure?"):
             self.root.destroy()
-        # ✅ Go back to login screen
         from main import show_login
         show_login()
 
     def delete_my_account(self):
-        """User self-deletion with complete cleanup"""
         if messagebox.askyesno("⚠️ DANGER", 
             f"PERMANENTLY delete your account '{self.username}'?\n\n"
             f"This will delete ALL your files, signatures, keys, and certificates.\n"
             f"This action CANNOT be undone!",
             icon='warning'):
 
-            # 1. Delete user from database
             conn = sqlite3.connect(self.auth.db_path)
             conn.execute("DELETE FROM users WHERE username = ?", (self.username,))
             conn.commit()
             conn.close()
 
-            # 2. Delete user's encrypted files and folder
             user_enc_dir = f"storage/encrypted/{self.username}"
             if os.path.exists(user_enc_dir):
                 try:
@@ -1559,7 +1485,6 @@ class UserDashboard:
                 except Exception as e:
                     print(f"⚠️ Could not delete encrypted folder: {e}")
 
-            # 3. Delete user's signature files and folder
             user_sig_dir = f"storage/signatures/{self.username}"
             if os.path.exists(user_sig_dir):
                 try:
@@ -1568,7 +1493,6 @@ class UserDashboard:
                 except Exception as e:
                     print(f"⚠️ Could not delete signatures folder: {e}")
 
-            # 4. Delete user's key files
             user_priv_key = f"storage/keystores/{self.username}_private.pem"
             user_pub_key = f"storage/keystores/{self.username}_public.pem"
             for key_file in [user_priv_key, user_pub_key]:
@@ -1579,7 +1503,6 @@ class UserDashboard:
                     except Exception as e:
                         print(f"⚠️ Could not delete key: {e}")
 
-            # 5. Delete user's certificate
             user_cert = f"storage/certs/{self.username}_cert.pem"
             if os.path.exists(user_cert):
                 try:
@@ -1588,7 +1511,6 @@ class UserDashboard:
                 except Exception as e:
                     print(f"⚠️ Could not delete certificate: {e}")
 
-            # 6. Clean up audit data
             try:
                 conn = sqlite3.connect("storage/audit.db")
                 conn.execute("DELETE FROM audit_log WHERE username = ?", (self.username,))
