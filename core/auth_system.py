@@ -51,8 +51,10 @@ class AuthSystem:
         if "first_login" not in columns:
             cursor.execute("ALTER TABLE users ADD COLUMN first_login INTEGER DEFAULT 0")
             cursor.execute("UPDATE users SET first_login = 1 WHERE username = 'admin'")
-            conn.commit()
         
+        # Convert old revoked account status to the new admin-dashboard status model.
+        cursor.execute("UPDATE users SET status = 'blocked' WHERE status = 'revoked'")
+        conn.commit()
         conn.close()
     
     def login(self, username, password):
@@ -66,8 +68,13 @@ class AuthSystem:
         conn.close()
         
         if user:
-            if user[2] == "revoked":
-                return None, "Account revoked!"
+            if user[2] in ["blocked", "suspended", "revoked"]:
+                status_messages = {
+                    "blocked": "Account blocked! Please contact admin.",
+                    "suspended": "Account suspended! Please contact admin.",
+                    "revoked": "Account revoked!"
+                }
+                return None, status_messages.get(user[2], "Account disabled!")
             
             is_first_login = user[3] == 1 if user[3] is not None else False
             
