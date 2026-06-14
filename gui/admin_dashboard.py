@@ -4,7 +4,7 @@ import sys
 import os
 import shutil
 import sqlite3
-from datetime import datetime, timedelta  # ✅ timedelta pani add gara
+from datetime import datetime, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.auth_system import AuthSystem
@@ -50,7 +50,7 @@ class AdminDashboard:
             ("📊", "Dashboard", "dashboard"),
             ("👥", "User Management", "users"),
             ("📜", "Audit Logs", "logs"),
-            ("🔐", "Certificate Management", "certs"),
+            ("", "Certificate Management", "certs"),
             ("❌", "Revoked Certificates", "revoked"),
             ("📄", "Documents", "docs"),
             ("⚙️", "System Settings", "settings"),
@@ -95,8 +95,12 @@ class AdminDashboard:
                      fg_color="#1e293b", hover_color="#334155",
                      text_color="#94a3b8", corner_radius=8).pack(side="right")
         
-        self.content_frame = ctk.CTkFrame(self.main_content, fg_color="transparent")
-        self.content_frame.pack(fill="both", expand=True, padx=30, pady=10)
+        # SCROLLABLE CONTENT FRAME
+        self.content_scroll = ctk.CTkScrollableFrame(self.main_content, fg_color="transparent")
+        self.content_scroll.pack(fill="both", expand=True, padx=30, pady=10)
+        
+        self.content_frame = ctk.CTkFrame(self.content_scroll, fg_color="transparent")
+        self.content_frame.pack(fill="both", expand=True)
     
     def switch_view(self, view):
         for v, btn in self.menu_buttons.items():
@@ -161,10 +165,28 @@ class AdminDashboard:
             """)
             encrypted_docs = cursor.fetchone()[0]
             
+            cursor.execute("""
+                SELECT COUNT(*) FROM audit_log 
+                WHERE action = 'DECRYPT' AND result = 'SUCCESS'
+            """)
+            decrypted_docs = cursor.fetchone()[0]
+            
+            cursor.execute("""
+                SELECT COUNT(*) FROM audit_log 
+                WHERE action = 'HASH' AND result = 'SUCCESS'
+            """)
+            hash_docs = cursor.fetchone()[0]
+            
+            cursor.execute("""
+                SELECT COUNT(*) FROM audit_log 
+                WHERE action LIKE 'ADMIN_%' AND result = 'SUCCESS'
+            """)
+            admin_actions = cursor.fetchone()[0]
+            
             conn2 = sqlite3.connect(self.auth.db_path)
             cursor2 = conn2.cursor()
-            cursor2.execute("SELECT COUNT(*) FROM users WHERE status = 'revoked'")
-            revoked_users = cursor2.fetchone()[0]
+            cursor2.execute("SELECT COUNT(*) FROM users WHERE status IN ('blocked', 'suspended')")
+            restricted_users = cursor2.fetchone()[0]
             conn2.close()
             
             conn.close()
@@ -176,34 +198,56 @@ class AdminDashboard:
             signed_docs = 0
             verified_docs = 0
             encrypted_docs = 0
-            revoked_users = 0
+            decrypted_docs = 0
+            hash_docs = 0
+            admin_actions = 0
+            restricted_users = 0
         
-        self.create_stat_card(stats_frame, "👥 Total Users", str(total_users), 
+        # Row 1 - User & Document Stats
+        row1 = ctk.CTkFrame(stats_frame, fg_color="transparent")
+        row1.pack(fill="x", pady=5)
+        
+        self.create_stat_card(row1, "👥 Total Users", str(total_users), 
                              f"{active_users} active", "#6366f1", "#3b82f6")
-        self.create_stat_card(stats_frame, "📝 Signed Documents", str(signed_docs), 
+        self.create_stat_card(row1, "📝 Signed Documents", str(signed_docs), 
                              "All time", "#10b981", "#059669")
-        self.create_stat_card(stats_frame, "✅ Verified Documents", str(verified_docs), 
+        self.create_stat_card(row1, "✅ Verified Documents", str(verified_docs), 
                              "All time", "#f59e0b", "#d97706")
-        self.create_stat_card(stats_frame, "❌ Revoked Users", str(revoked_users), 
-                             "Access denied", "#ef4444", "#dc2626")
+        self.create_stat_card(row1, "🚫 Restricted Users", str(restricted_users), 
+                             "Blocked / suspended", "#ef4444", "#dc2626")
         
+        # Row 2 - Operation Stats
+        row2 = ctk.CTkFrame(stats_frame, fg_color="transparent")
+        row2.pack(fill="x", pady=5)
+        
+        self.create_stat_card(row2, "🔐 Encrypted", str(encrypted_docs), 
+                             "All time", "#8b5cf6", "#7c3aed")
+        self.create_stat_card(row2, "🔓 Decrypted", str(decrypted_docs), 
+                             "All time", "#ec4899", "#db2777")
+        self.create_stat_card(row2, "🔍 Hash Files", str(hash_docs), 
+                             "All time", "#06b6d4", "#0891b2")
+        self.create_stat_card(row2, " Admin Actions", str(admin_actions), 
+                             "All time", "#f97316", "#ea580c")
+        
+        # BOTTOM SECTION - Recent Activities & Users
         bottom_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
-        bottom_frame.pack(fill="both", expand=True)
+        bottom_frame.pack(fill="x", expand=True, pady=(10, 20))
         
+        # Recent Activities (left)
         activities_frame = ctk.CTkFrame(bottom_frame, fg_color="#1e293b", corner_radius=12)
         activities_frame.pack(side="left", fill="both", expand=True, padx=(0, 10))
         
         ctk.CTkLabel(activities_frame, text="📈 Recent Activities", 
                     font=("Inter", 16, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(15, 10))
         
-        activities_scroll = ctk.CTkScrollableFrame(activities_frame, fg_color="transparent")
+        activities_scroll = ctk.CTkScrollableFrame(activities_frame, fg_color="transparent", height=300)
         activities_scroll.pack(fill="both", expand=True, padx=20, pady=(0, 15))
         
         try:
             conn = sqlite3.connect("storage/audit.db")
             cursor = conn.execute("""
                 SELECT timestamp, username, action, file_name, result 
-                FROM audit_log ORDER BY timestamp DESC LIMIT 10
+                FROM audit_log ORDER BY timestamp DESC LIMIT 15
             """)
             activities = cursor.fetchall()
             conn.close()
@@ -214,18 +258,19 @@ class AdminDashboard:
         except:
             self.create_activity_item(activities_scroll, "System", "INIT", "No activities yet", "Now", "SUCCESS")
         
+        # Recent Users (right)
         users_frame = ctk.CTkFrame(bottom_frame, fg_color="#1e293b", corner_radius=12)
         users_frame.pack(side="right", fill="both", expand=True, padx=(10, 0))
         
         ctk.CTkLabel(users_frame, text="👥 Recent Users", 
                     font=("Inter", 16, "bold"), text_color="#f8fafc").pack(anchor="w", padx=20, pady=(15, 10))
         
-        users_scroll = ctk.CTkScrollableFrame(users_frame, fg_color="transparent")
+        users_scroll = ctk.CTkScrollableFrame(users_frame, fg_color="transparent", height=300)
         users_scroll.pack(fill="both", expand=True, padx=20, pady=(0, 15))
         
         try:
             conn = sqlite3.connect(self.auth.db_path)
-            cursor = conn.execute("SELECT username, role, status, created_at FROM users ORDER BY created_at DESC LIMIT 8")
+            cursor = conn.execute("SELECT username, role, status, created_at FROM users ORDER BY created_at DESC LIMIT 10")
             users = cursor.fetchall()
             conn.close()
             
@@ -253,10 +298,10 @@ class AdminDashboard:
         
         icons = {
             "SIGN": "📝", "VERIFY": "✅", "ENCRYPT": "🔐", 
-            "DECRYPT": "🔓", "SETUP": "⚙️", "USER_SET": "👤",
+            "DECRYPT": "🔓", "SETUP": "⚙️", "USER_SET": "",
             "REVOKE": "❌", "HASH": "🔍", "ADMIN": "👑",
             "BATCH_SIGN": "📦", "ADMIN_ADD_USER": "➕",
-            "ADMIN_REVOKE": "🚫", "ADMIN_ACTIVATE": "✅",
+            "ADMIN_REVOKE": "", "ADMIN_ACTIVATE": "✅",
             "ADMIN_DELETE": "🗑️", "ADMIN_ROLE_CHANGE": "👑"
         }
         icon = icons.get(action, "📋")
@@ -292,86 +337,214 @@ class AdminDashboard:
         ctk.CTkLabel(frame, text=created[:10] if created else "N/A", 
                     font=("Inter", 10), text_color="#64748b").pack(side="right", padx=10)
     
+
     def show_users(self):
         self.header_title.configure(text="User Management")
-        
-        toolbar = ctk.CTkFrame(self.content_frame, fg_color="transparent")
-        toolbar.pack(fill="x", pady=(0, 15))
-        
-        ctk.CTkButton(toolbar, text="➕ Add User", width=120, height=35,
-                     font=("Inter", 12), fg_color="#10b981", hover_color="#059669",
-                     corner_radius=8, command=self.add_user).pack(side="left", padx=5)
-        
-        ctk.CTkButton(toolbar, text="🔄 Refresh", width=120, height=35,
-                     font=("Inter", 12), fg_color="#6366f1", hover_color="#4f46e5",
-                     corner_radius=8, command=lambda: self.switch_view("users")).pack(side="left", padx=5)
-        
-        table_frame = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
-        table_frame.pack(fill="both", expand=True)
-        
-        headers = ctk.CTkFrame(table_frame, fg_color="#334155", corner_radius=8)
-        headers.pack(fill="x", padx=20, pady=15)
-        
-        for col, width in [("Username", 200), ("Role", 150), ("Status", 150), ("Created", 200), ("Actions", 300)]:
-            ctk.CTkLabel(headers, text=col, font=("Inter", 12, "bold"), 
-                        text_color="#94a3b8", width=width).pack(side="left", padx=10, pady=10)
-        
-        scroll = ctk.CTkScrollableFrame(table_frame, fg_color="transparent")
-        scroll.pack(fill="both", expand=True, padx=20, pady=(0, 15))
-        
+
         users = self.auth.get_all_users()
+        total_users = len(users)
+        active_users = sum(1 for user in users if user[2] == "active")
+        blocked_users = sum(1 for user in users if user[2] == "blocked")
+        suspended_users = sum(1 for user in users if user[2] == "suspended")
+        admin_users = sum(1 for user in users if user[1] == "admin")
+
+        # ===== HERO SECTION =====
+        hero = ctk.CTkFrame(self.content_frame, fg_color="#111827", corner_radius=18)
+        hero.pack(fill="x", pady=(0, 22))
+        hero.grid_columnconfigure(0, weight=1)
+        hero.grid_columnconfigure(1, weight=0)
+
+        title_area = ctk.CTkFrame(hero, fg_color="transparent")
+        title_area.grid(row=0, column=0, sticky="ew", padx=28, pady=24)
+
+        ctk.CTkLabel(title_area, text=" Team Directory", font=("Inter", 28, "bold"),
+                    text_color="#f8fafc").pack(anchor="w")
+        ctk.CTkLabel(title_area,
+                    text="Manage user accounts, assign administrative privileges, and control access levels across the organization.",
+                    font=("Inter", 13), text_color="#94a3b8").pack(anchor="w", pady=(8, 0))
+
+        action_area = ctk.CTkFrame(hero, fg_color="transparent")
+        action_area.grid(row=0, column=1, sticky="e", padx=28, pady=24)
+
+        ctk.CTkButton(action_area, text="➕ Add User", width=145, height=42,
+                     font=("Inter", 13, "bold"), fg_color="#10b981", hover_color="#059669",
+                     corner_radius=11, command=self.add_user).pack(side="left", padx=(0, 10))
+        ctk.CTkButton(action_area, text="🔄 Refresh", width=125, height=42,
+                     font=("Inter", 13, "bold"), fg_color="#6366f1", hover_color="#4f46e5",
+                     corner_radius=11, command=lambda: self.switch_view("users")).pack(side="left")
+
+        # ===== STATS ROW =====
+        stats_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        stats_frame.pack(fill="x", pady=(0, 22))
+        self.create_stat_card(stats_frame, " Total Users", str(total_users), f"{admin_users} admins", "#6366f1", "#4f46e5")
+        self.create_stat_card(stats_frame, "✅ Active", str(active_users), "Can login", "#10b981", "#059669")
+        self.create_stat_card(stats_frame, "🚫 Blocked", str(blocked_users), "Access denied", "#ef4444", "#dc2626")
+        self.create_stat_card(stats_frame, " Suspended", str(suspended_users), "Temporarily paused", "#f59e0b", "#d97706")
+
+        # ===== TABLE CONTAINER =====
+        table_frame = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=18)
+        table_frame.pack(fill="both", expand=True, pady=(0, 22))
+        table_frame.grid_columnconfigure(0, weight=1)
+        table_frame.grid_rowconfigure(2, weight=1)
+
+        # Table title
+        table_top = ctk.CTkFrame(table_frame, fg_color="transparent")
+        table_top.grid(row=0, column=0, sticky="ew", padx=28, pady=(24, 14))
+        ctk.CTkLabel(table_top, text="All Users", font=("Inter", 22, "bold"),
+                    text_color="#f8fafc").pack(side="left")
+        ctk.CTkLabel(table_top, text="Role and status can be changed directly from each row.",
+                    font=("Inter", 12), text_color="#94a3b8").pack(side="right")
+
+        # ✅ FIXED HEADER SECTION START
+        header_frame = ctk.CTkFrame(table_frame, fg_color="#334155", corner_radius=12, height=50)
+        header_frame.grid(row=1, column=0, sticky="ew", padx=28, pady=(0, 8))
+        header_frame.pack_propagate(False)
+        
+        # Column weights define width ratio
+        header_frame.grid_columnconfigure(0, weight=3, minsize=200)   # User
+        header_frame.grid_columnconfigure(1, weight=1, minsize=100)   # Role
+        header_frame.grid_columnconfigure(2, weight=1, minsize=100)   # Status
+        header_frame.grid_columnconfigure(3, weight=1, minsize=100)   # Created
+        header_frame.grid_columnconfigure(4, weight=1, minsize=100)   # Last Login
+        header_frame.grid_columnconfigure(5, weight=2, minsize=180)   # Actions
+
+        headers = [
+            ("User", 0), ("Role", 1), ("Status", 2), 
+            ("Created", 3), ("Last Login", 4), ("Actions", 5)
+        ]
+
+        for text, col in headers:
+            # Transparent wrapper ensures padding matches data cells exactly
+            cell = ctk.CTkFrame(header_frame, fg_color="transparent")
+            # Col 0 gets extra left padding (14), others get standard (10)
+            pad_x = (14, 8) if col == 0 else (10, 10)
+            cell.grid(row=0, column=col, sticky="w", padx=pad_x, pady=14)
+            
+            ctk.CTkLabel(cell, text=text, font=("Inter", 13, "bold"),
+                        text_color="#e2e8f0", anchor="w").pack(anchor="w")
+        # ✅ FIXED HEADER SECTION END
+
+        # Scrollable Data Area
+        scroll = ctk.CTkScrollableFrame(table_frame, fg_color="transparent", height=420)
+        scroll.grid(row=2, column=0, sticky="nsew", padx=28, pady=(0, 24))
+
+        if not users:
+            empty = ctk.CTkFrame(scroll, fg_color="#0f172a", corner_radius=14)
+            empty.pack(fill="x", pady=10, ipady=26)
+            ctk.CTkLabel(empty, text="No users found", font=("Inter", 16, "bold"),
+                        text_color="#f8fafc").pack(pady=(18, 4))
+            ctk.CTkLabel(empty, text="Click Add User to create the first account.",
+                        font=("Inter", 13), text_color="#94a3b8").pack(pady=(0, 18))
+            return
+
         for user in users:
             self.create_user_row(scroll, user)
-    
+
+    # ✅ FIXED CREATE_USER_ROW METHOD START
     def create_user_row(self, parent, user):
-        username, role, status, created, _ = user
+        username, role, status, created, last_login = user
+        status = status if status in ["active", "blocked", "suspended"] else "active"
+
+        row = ctk.CTkFrame(parent, fg_color="#0f172a", corner_radius=10, height=56)
+        row.pack(fill="x", pady=4)
+        row.pack_propagate(False)
+
+        # Exact same weights as header
+        row.grid_columnconfigure(0, weight=3, minsize=200)
+        row.grid_columnconfigure(1, weight=1, minsize=100)
+        row.grid_columnconfigure(2, weight=1, minsize=100)
+        row.grid_columnconfigure(3, weight=1, minsize=100)
+        row.grid_columnconfigure(4, weight=1, minsize=100)
+        row.grid_columnconfigure(5, weight=2, minsize=180)
+
+        # --- Column 0: User ---
+        user_cell = ctk.CTkFrame(row, fg_color="transparent")
+        user_cell.grid(row=0, column=0, sticky="w", padx=(14, 8), pady=8)
+        ctk.CTkLabel(user_cell, text=f" {username}", font=("Inter", 13, "bold"),
+                    text_color="#f8fafc", anchor="w").pack(anchor="w")
+        sub_text = "Current admin" if username == self.admin['username'] else "Managed account"
+        ctk.CTkLabel(user_cell, text=sub_text, font=("Inter", 10), 
+                    text_color="#64748b", anchor="w").pack(anchor="w")
+
+        # --- Column 1: Role (Wrapped in transparent frame) ---
+        role_cell = ctk.CTkFrame(row, fg_color="transparent")
+        role_cell.grid(row=0, column=1, sticky="w", padx=10, pady=8)
         
-        row = ctk.CTkFrame(parent, fg_color="#0f172a", corner_radius=8)
-        row.pack(fill="x", pady=3)
+        role_box = ctk.CTkOptionMenu(role_cell, values=["admin", "user"], width=110, height=32,
+                                    font=("Inter", 11, "bold"), dropdown_font=("Inter", 11),
+                                    fg_color="#1e293b", button_color="#6366f1", button_hover_color="#4f46e5",
+                                    dropdown_fg_color="#1e293b", dropdown_hover_color="#334155",
+                                    text_color="#f8fafc", corner_radius=8,
+                                    command=lambda new_role, u=username: self.change_role(u, new_role))
+        role_box.set(role if role in ["admin", "user"] else "user")
+        role_box.pack(anchor="w")  # ✅ Pack inside wrapper instead of grid
+        if username == self.admin['username']:
+            role_box.configure(state="disabled")
+
+        # --- Column 2: Status (Wrapped in transparent frame) ---
+        status_cell = ctk.CTkFrame(row, fg_color="transparent")
+        status_cell.grid(row=0, column=2, sticky="w", padx=10, pady=8)
         
-        ctk.CTkLabel(row, text=username, font=("Inter", 12), 
-                    text_color="#f8fafc", width=200).pack(side="left", padx=10, pady=10)
-        
-        role_color = "#6366f1" if role == "admin" else "#94a3b8"
-        ctk.CTkLabel(row, text=role, font=("Inter", 12, "bold"), 
-                    text_color=role_color, width=150).pack(side="left", padx=10)
-        
-        status_color = "#10b981" if status == "active" else "#ef4444"
-        ctk.CTkLabel(row, text=status, font=("Inter", 12), 
-                    text_color=status_color, width=150).pack(side="left", padx=10)
-        
-        ctk.CTkLabel(row, text=created[:10] if created else "N/A", 
-                    font=("Inter", 11), text_color="#64748b", width=200).pack(side="left", padx=10)
-        
-        actions = ctk.CTkFrame(row, fg_color="transparent", width=300)
-        actions.pack(side="left", padx=10)
-        
+        status_box = ctk.CTkOptionMenu(status_cell, values=["active", "blocked", "suspended"], 
+                                      width=110, height=32,
+                                      font=("Inter", 11, "bold"), dropdown_font=("Inter", 11),
+                                      fg_color="#1e293b", button_color=self._status_color(status),
+                                      button_hover_color=self._status_hover_color(status),
+                                      dropdown_fg_color="#1e293b", dropdown_hover_color="#334155",
+                                      text_color="#f8fafc", corner_radius=8,
+                                      command=lambda new_status, u=username: self.change_status(u, new_status))
+        status_box.set(status)
+        status_box.pack(anchor="w")  # ✅ Pack inside wrapper instead of grid
+        if username == self.admin['username']:
+            status_box.configure(state="disabled")
+
+        # --- Column 3: Created ---
+        created_cell = ctk.CTkFrame(row, fg_color="transparent")
+        created_cell.grid(row=0, column=3, sticky="w", padx=10, pady=8)
+        ctk.CTkLabel(created_cell, text=self._format_date(created), font=("Inter", 11),
+                    text_color="#cbd5e1", anchor="w").pack(anchor="w")
+
+        # --- Column 4: Last Login ---
+        login_cell = ctk.CTkFrame(row, fg_color="transparent")
+        login_cell.grid(row=0, column=4, sticky="w", padx=10, pady=8)
+        ctk.CTkLabel(login_cell, text=self._format_date(last_login), font=("Inter", 11),
+                    text_color="#94a3b8", anchor="w").pack(anchor="w")
+
+        # --- Column 5: Actions ---
+        actions = ctk.CTkFrame(row, fg_color="transparent")
+        actions.grid(row=0, column=5, sticky="w", padx=(10, 14), pady=8)
+
+        ctk.CTkButton(actions, text="✏️ Edit", width=70, height=30,
+                     font=("Inter", 11, "bold"), fg_color="#0ea5e9", hover_color="#0284c7",
+                     corner_radius=8, command=lambda u=username: self.edit_user(u)).pack(side="left", padx=(0, 6))
+
         if username != self.admin['username']:
-            if status == "active":
-                ctk.CTkButton(actions, text="🚫", width=30, height=28,
-                             fg_color="#ef4444", hover_color="#dc2626",
-                             corner_radius=6, command=lambda u=username: self.revoke_user(u)).pack(side="left", padx=2)
-            else:
-                ctk.CTkButton(actions, text="✅", width=30, height=28,
-                             fg_color="#10b981", hover_color="#059669",
-                             corner_radius=6, command=lambda u=username: self.activate_user(u)).pack(side="left", padx=2)
-            
-            new_role = "user" if role == "admin" else "admin"
-            ctk.CTkButton(actions, text="👑", width=30, height=28,
-                         fg_color="#6366f1", hover_color="#4f46e5",
-                         corner_radius=6, command=lambda u=username, r=new_role: self.change_role(u, r)).pack(side="left", padx=2)
-            
-            ctk.CTkButton(actions, text="🗑️", width=30, height=28,
-                         fg_color="#64748b", hover_color="#475569",
-                         corner_radius=6, command=lambda u=username: self.delete_user(u)).pack(side="left", padx=2)
-    
+            ctk.CTkButton(actions, text="🗑 Delete", width=80, height=30,
+                         font=("Inter", 11, "bold"), fg_color="#ef4444", hover_color="#dc2626",
+                         corner_radius=8, command=lambda u=username: self.delete_user(u)).pack(side="left")
+        else:
+            ctk.CTkLabel(actions, text="Protected", font=("Inter", 11, "bold"),
+                        text_color="#94a3b8", width=80).pack(side="left")
+    # ✅ FIXED CREATE_USER_ROW METHOD END
+
+    def _status_color(self, status):
+        return {"active": "#10b981", "blocked": "#ef4444", "suspended": "#f59e0b"}.get(status, "#64748b")
+
+    def _status_hover_color(self, status):
+        return {"active": "#059669", "blocked": "#dc2626", "suspended": "#d97706"}.get(status, "#475569")
+
+    def _format_date(self, value):
+        if not value:
+            return "N/A"
+        return str(value)[:10]
+
     def show_logs(self):
         self.header_title.configure(text="Audit Logs")
         
         toolbar = ctk.CTkFrame(self.content_frame, fg_color="transparent")
         toolbar.pack(fill="x", pady=(0, 15))
         
-        ctk.CTkButton(toolbar, text="📥 Export CSV", width=120, height=35,
+        ctk.CTkButton(toolbar, text=" Export CSV", width=120, height=35,
                      font=("Inter", 12), fg_color="#10b981", hover_color="#059669",
                      corner_radius=8, command=self.export_logs).pack(side="right")
         
@@ -431,7 +604,7 @@ class AdminDashboard:
                      font=("Inter", 12), fg_color="#6366f1", hover_color="#4f46e5",
                      corner_radius=8, command=lambda: self.switch_view("certs")).pack(side="left", padx=5)
         
-        ctk.CTkButton(toolbar, text="🏛 View CA Cert", width=140, height=35,
+        ctk.CTkButton(toolbar, text=" View CA Cert", width=140, height=35,
                      font=("Inter", 12), fg_color="#10b981", hover_color="#059669",
                      corner_radius=8, command=self.view_ca_cert).pack(side="left", padx=5)
         
@@ -443,9 +616,9 @@ class AdminDashboard:
         if os.path.exists("storage/certs"):
             cert_count = len([f for f in os.listdir("storage/certs") if f.endswith("_cert.pem")])
         
-        self.create_stat_card(stats_frame, "🏛 CA Certificate", "Active" if ca_exists else "Missing", 
+        self.create_stat_card(stats_frame, " CA Certificate", "Active" if ca_exists else "Missing", 
                              "Root authority", "#10b981", "#059669")
-        self.create_stat_card(stats_frame, "📜 User Certs", str(cert_count), 
+        self.create_stat_card(stats_frame, " User Certs", str(cert_count), 
                              "Issued certificates", "#6366f1", "#3b82f6")
         self.create_stat_card(stats_frame, "🔐 Key Stores", str(cert_count), 
                              "Private keys", "#f59e0b", "#d97706")
@@ -512,7 +685,7 @@ class AdminDashboard:
                      fg_color="#6366f1", hover_color="#4f46e5",
                      corner_radius=6, command=lambda u=username: self.view_cert(u)).pack(side="left", padx=2)
         
-        ctk.CTkButton(actions, text="📥 Download", width=80, height=28,
+        ctk.CTkButton(actions, text=" Download", width=80, height=28,
                      fg_color="#10b981", hover_color="#059669",
                      corner_radius=6, command=lambda c=cert_path: self.download_cert(c)).pack(side="left", padx=2)
         
@@ -709,7 +882,7 @@ class AdminDashboard:
             encrypted_count = 0
             total_count = 0
         
-        self.create_stat_card(stats_frame, "📝 Signed", str(signed_count), 
+        self.create_stat_card(stats_frame, " Signed", str(signed_count), 
                              "Tracked files", "#6366f1", "#3b82f6")
         self.create_stat_card(stats_frame, "🔐 Encrypted", str(encrypted_count), 
                              "Tracked files", "#f59e0b", "#d97706")
@@ -808,7 +981,7 @@ class AdminDashboard:
         row.pack(fill="x", pady=3)
         
         icons = {"signed": "📝", "encrypted": "🔐", "cert": "🏛"}
-        icon = icons.get(file_type, "📄")
+        icon = icons.get(file_type, "")
         
         type_color = "#6366f1" if file_type == "signed" else "#f59e0b" if file_type == "encrypted" else "#10b981"
         
@@ -838,7 +1011,7 @@ class AdminDashboard:
                          fg_color="#6366f1", hover_color="#4f46e5",
                          corner_radius=6, command=lambda p=file_path: self._open_file(p)).pack(side="left", padx=2)
             
-            ctk.CTkButton(actions, text="⬇ Save", width=60, height=28,
+            ctk.CTkButton(actions, text=" Save", width=60, height=28,
                          fg_color="#10b981", hover_color="#059669",
                          corner_radius=6, command=lambda p=file_path, n=original_name: self._save_file(p, n)).pack(side="left", padx=2)
             
@@ -913,7 +1086,7 @@ class AdminDashboard:
         settings_frame = ctk.CTkFrame(self.content_frame, fg_color="#1e293b", corner_radius=12)
         settings_frame.pack(fill="both", expand=True)
         
-        ctk.CTkLabel(settings_frame, text="⚙️ System Settings", 
+        ctk.CTkLabel(settings_frame, text="️ System Settings", 
                     font=("Inter", 20, "bold"), text_color="#f8fafc").pack(pady=30)
         
         info_frame = ctk.CTkFrame(settings_frame, fg_color="#0f172a", corner_radius=10)
@@ -994,145 +1167,266 @@ class AdminDashboard:
             messagebox.showerror("Error", str(e))
     
     def add_user(self):
-        dialog = ctk.CTkInputDialog(title="Add New User", text="Enter username:")
-        username = dialog.get_input()
-        
-        if username:
-            password = simpledialog.askstring("Password", "Enter password:", show='*')
-            if password:
-                if len(password) < 6:
-                    messagebox.showerror("Error", "Password must be at least 6 characters!")
-                    return
-                
-                role_dialog = ctk.CTkInputDialog(title="Role", text="Enter role (admin/user):")
-                role = role_dialog.get_input() or "user"
-                
-                success, msg = self.auth.register(username, password, role)
-                if success:
-                    self.audit.log(self.admin['username'], "ADMIN_ADD_USER", "SUCCESS", 
-                                  details=f"Added: {username} ({role})")
-                    messagebox.showinfo("Success", f"User '{username}' added!")
-                    self.switch_view("users")
-                else:
-                    messagebox.showerror("Error", msg)
-    
-    def revoke_user(self, username):
-        if messagebox.askyesno("Confirm", f"Revoke '{username}'?"):
-            # 1. Update user status in database
-            conn = sqlite3.connect(self.auth.db_path)
-            conn.execute("UPDATE users SET status = 'revoked' WHERE username = ?", (username,))
-            conn.commit()
-            conn.close()
+        dialog = ctk.CTkToplevel(self.root)
+        dialog.title("Add User")
+        dialog.geometry("430x560")
+        dialog.configure(fg_color="#0f172a")
+        dialog.grab_set()
+        dialog.resizable(False, False)
 
-            # 2. Add to revocation list
-            from core.revocation import revoke_user
-            revoke_user(username)
+        ctk.CTkLabel(dialog, text="➕ Add New User", font=("Inter", 20, "bold"),
+                    text_color="#f8fafc").pack(pady=(16, 4))
+        ctk.CTkLabel(dialog, text="Create an account with role and access status.",
+                    font=("Inter", 12), text_color="#94a3b8").pack(pady=(0, 10))
 
-            # 3. Delete user's encrypted files and folder (cleanup)
-            user_enc_dir = f"storage/encrypted/{username}"
-            if os.path.exists(user_enc_dir):
-                try:
-                    shutil.rmtree(user_enc_dir)
-                    print(f"✅ Deleted encrypted folder: {user_enc_dir}")
-                except Exception as e:
-                    print(f"⚠️ Could not delete encrypted folder: {e}")
+        form = ctk.CTkFrame(dialog, fg_color="#1e293b", corner_radius=14)
+        form.pack(fill="x", padx=24, pady=(0, 12))
 
-            # 4. Delete user's signature files and folder (cleanup)
-            user_sig_dir = f"storage/signatures/{username}"
-            if os.path.exists(user_sig_dir):
-                try:
-                    shutil.rmtree(user_sig_dir)
-                    print(f"✅ Deleted signatures folder: {user_sig_dir}")
-                except Exception as e:
-                    print(f"⚠️ Could not delete signatures folder: {e}")
+        ctk.CTkLabel(form, text="Username", font=("Inter", 12, "bold"),
+                    text_color="#cbd5e1").pack(anchor="w", padx=18, pady=(18, 4))
+        username_entry = ctk.CTkEntry(form, height=36, placeholder_text="Enter username")
+        username_entry.pack(fill="x", padx=18)
 
-            # 5. Delete user's key files
-            user_priv_key = f"storage/keystores/{username}_private.pem"
-            user_pub_key = f"storage/keystores/{username}_public.pem"
-            for key_file in [user_priv_key, user_pub_key]:
-                if os.path.exists(key_file):
-                    try:
-                        os.remove(key_file)
-                        print(f"✅ Deleted key: {key_file}")
-                    except Exception as e:
-                        print(f"⚠️ Could not delete key: {e}")
+        ctk.CTkLabel(form, text="Password", font=("Inter", 12, "bold"),
+                    text_color="#cbd5e1").pack(anchor="w", padx=18, pady=(14, 4))
+        password_entry = ctk.CTkEntry(form, height=36, placeholder_text="Minimum 8 characters", show="*")
+        password_entry.pack(fill="x", padx=18)
 
-            # 6. Delete user's certificate
-            user_cert = f"storage/certs/{username}_cert.pem"
-            if os.path.exists(user_cert):
-                try:
-                    os.remove(user_cert)
-                    print(f"✅ Deleted certificate: {user_cert}")
-                except Exception as e:
-                    print(f"⚠️ Could not delete certificate: {e}")
+        ctk.CTkLabel(form, text="Role", font=("Inter", 12, "bold"),
+                    text_color="#cbd5e1").pack(anchor="w", padx=18, pady=(14, 4))
+        role_menu = ctk.CTkOptionMenu(form, values=["user", "admin"], height=36,
+                                     fg_color="#0f172a", button_color="#6366f1", button_hover_color="#4f46e5")
+        role_menu.set("user")
+        role_menu.pack(fill="x", padx=18)
 
-            self.audit.log(self.admin['username'], "ADMIN_REVOKE", "SUCCESS", details=f"Revoked: {username}")
+        ctk.CTkLabel(form, text="Status", font=("Inter", 12, "bold"),
+                    text_color="#cbd5e1").pack(anchor="w", padx=18, pady=(14, 4))
+        status_menu = ctk.CTkOptionMenu(form, values=["active", "blocked", "suspended"], height=36,
+                                       fg_color="#0f172a", button_color="#10b981", button_hover_color="#059669")
+        status_menu.set("active")
+        status_menu.pack(fill="x", padx=18)
+
+        buttons = ctk.CTkFrame(dialog, fg_color="transparent")
+        buttons.pack(fill="x", padx=24, pady=(0, 18), side="bottom")
+
+        def save_user():
+            username = username_entry.get().strip()
+            password = password_entry.get().strip()
+            role = role_menu.get()
+            status = status_menu.get()
+
+            if not username:
+                messagebox.showerror("Error", "Username is required!", parent=dialog)
+                return
+            if not password or len(password) < 8:
+                messagebox.showerror("Error", "Password must be at least 8 characters!", parent=dialog)
+                return
+
+            success, msg = self.auth.register(username, password, role)
+            if not success:
+                messagebox.showerror("Error", msg, parent=dialog)
+                return
+
+            self.change_status(username, status, refresh=False, silent=True)
+            self.audit.log(self.admin['username'], "ADMIN_ADD_USER", "SUCCESS",
+                          details=f"Added: {username} ({role}, {status})")
+            dialog.destroy()
+            messagebox.showinfo("Success", f"User '{username}' added successfully!")
             self.switch_view("users")
-    
-    def activate_user(self, username):
+
+        ctk.CTkButton(buttons, text="Cancel", height=40, fg_color="#475569", hover_color="#334155",
+                     font=("Inter", 12, "bold"), command=dialog.destroy).pack(side="left", fill="x", expand=True, padx=(0, 6))
+        ctk.CTkButton(buttons, text="✅ Add User", height=40, fg_color="#10b981", hover_color="#059669",
+                     font=("Inter", 12, "bold"), command=save_user).pack(side="left", fill="x", expand=True, padx=(6, 0))
+
+    def edit_user(self, username):
+        user = self.auth.get_user(username)
+        if not user:
+            messagebox.showerror("Error", "User not found!")
+            return
+
+        current_username, current_role, current_status, _ = user
+        current_status = current_status if current_status in ["active", "blocked", "suspended"] else "active"
+
+        dialog = ctk.CTkToplevel(self.root)
+        dialog.title(f"Edit User - {username}")
+        dialog.geometry("430x590")
+        dialog.configure(fg_color="#0f172a")
+        dialog.grab_set()
+        dialog.resizable(False, False)
+
+        ctk.CTkLabel(dialog, text="✏️ Edit User", font=("Inter", 20, "bold"),
+                    text_color="#f8fafc").pack(pady=(16, 4))
+        ctk.CTkLabel(dialog, text="Update username, role, status or reset password.",
+                    font=("Inter", 12), text_color="#94a3b8").pack(pady=(0, 10))
+
+        form = ctk.CTkFrame(dialog, fg_color="#1e293b", corner_radius=14)
+        form.pack(fill="x", padx=24, pady=(0, 12))
+
+        ctk.CTkLabel(form, text="Username", font=("Inter", 12, "bold"),
+                    text_color="#cbd5e1").pack(anchor="w", padx=18, pady=(18, 4))
+        username_entry = ctk.CTkEntry(form, height=36)
+        username_entry.insert(0, current_username)
+        username_entry.pack(fill="x", padx=18)
+        if current_username == self.admin['username']:
+            username_entry.configure(state="disabled")
+
+        ctk.CTkLabel(form, text="New Password (optional)", font=("Inter", 12, "bold"),
+                    text_color="#cbd5e1").pack(anchor="w", padx=18, pady=(14, 4))
+        password_entry = ctk.CTkEntry(form, height=36, placeholder_text="Leave empty to keep current password (min 8 chars)", show="*")
+        password_entry.pack(fill="x", padx=18)
+
+        ctk.CTkLabel(form, text="Role", font=("Inter", 12, "bold"),
+                    text_color="#cbd5e1").pack(anchor="w", padx=18, pady=(14, 4))
+        role_menu = ctk.CTkOptionMenu(form, values=["user", "admin"], height=36,
+                                     fg_color="#0f172a", button_color="#6366f1", button_hover_color="#4f46e5")
+        role_menu.set(current_role if current_role in ["admin", "user"] else "user")
+        role_menu.pack(fill="x", padx=18)
+        if current_username == self.admin['username']:
+            role_menu.configure(state="disabled")
+
+        ctk.CTkLabel(form, text="Status", font=("Inter", 12, "bold"),
+                    text_color="#cbd5e1").pack(anchor="w", padx=18, pady=(14, 4))
+        status_menu = ctk.CTkOptionMenu(form, values=["active", "blocked", "suspended"], height=36,
+                                       fg_color="#0f172a", button_color=self._status_color(current_status),
+                                       button_hover_color=self._status_hover_color(current_status))
+        status_menu.set(current_status)
+        status_menu.pack(fill="x", padx=18)
+        if current_username == self.admin['username']:
+            status_menu.configure(state="disabled")
+
+        buttons = ctk.CTkFrame(dialog, fg_color="transparent")
+        buttons.pack(fill="x", padx=24, pady=(0, 18), side="bottom")
+
+        def save_changes():
+            new_username = username_entry.get().strip() if current_username != self.admin['username'] else current_username
+            new_password = password_entry.get().strip()
+            new_role = role_menu.get()
+            new_status = status_menu.get()
+
+            if not new_username:
+                messagebox.showerror("Error", "Username is required!", parent=dialog)
+                return
+            if new_password and len(new_password) < 8:
+                messagebox.showerror("Error", "Password must be at least 8 characters!", parent=dialog)
+                return
+
+            try:
+                conn = sqlite3.connect(self.auth.db_path)
+                if new_username != current_username:
+                    exists = conn.execute("SELECT 1 FROM users WHERE username = ?", (new_username,)).fetchone()
+                    if exists:
+                        conn.close()
+                        messagebox.showerror("Error", "Username already exists!", parent=dialog)
+                        return
+
+                if new_password:
+                    conn.execute("""
+                        UPDATE users
+                        SET username = ?, password_hash = ?, role = ?, status = ?
+                        WHERE username = ?
+                    """, (new_username, self.auth._hash(new_password), new_role, new_status, current_username))
+                else:
+                    conn.execute("""
+                        UPDATE users
+                        SET username = ?, role = ?, status = ?
+                        WHERE username = ?
+                    """, (new_username, new_role, new_status, current_username))
+                conn.commit()
+                conn.close()
+            except Exception as e:
+                messagebox.showerror("Error", str(e), parent=dialog)
+                return
+
+            self.audit.log(self.admin['username'], "ADMIN_EDIT_USER", "SUCCESS",
+                          details=f"Edited: {current_username} → {new_username} ({new_role}, {new_status})")
+            dialog.destroy()
+            messagebox.showinfo("Success", f"User '{new_username}' updated successfully!")
+            self.switch_view("users")
+
+        ctk.CTkButton(buttons, text="Cancel", height=40, fg_color="#475569", hover_color="#334155",
+                     font=("Inter", 12, "bold"), command=dialog.destroy).pack(side="left", fill="x", expand=True, padx=(0, 6))
+        ctk.CTkButton(buttons, text="✅ Save Changes", height=40, fg_color="#0ea5e9", hover_color="#0284c7",
+                     font=("Inter", 12, "bold"), command=save_changes).pack(side="left", fill="x", expand=True, padx=(6, 0))
+
+    def change_status(self, username, new_status, refresh=True, silent=False):
+        if new_status not in ["active", "blocked", "suspended"]:
+            messagebox.showerror("Error", "Invalid status selected!")
+            return
+        if username == self.admin['username'] and new_status != "active":
+            messagebox.showerror("Protected", "You cannot block or suspend the currently logged-in admin.")
+            return
+
+        if not silent and not messagebox.askyesno("Confirm Status Change", f"Change '{username}' status to {new_status}?"):
+            if refresh:
+                self.switch_view("users")
+            return
+
         conn = sqlite3.connect(self.auth.db_path)
-        conn.execute("UPDATE users SET status = 'active' WHERE username = ?", (username,))
+        conn.execute("UPDATE users SET status = ? WHERE username = ?", (new_status, username))
         conn.commit()
         conn.close()
-        self.audit.log(self.admin['username'], "ADMIN_ACTIVATE", "SUCCESS", details=f"Activated: {username}")
-        self.switch_view("users")
-    
+        self.audit.log(self.admin['username'], "ADMIN_STATUS_CHANGE", "SUCCESS", details=f"{username} → {new_status}")
+        if refresh:
+            self.switch_view("users")
+
+    def activate_user(self, username):
+        self.change_status(username, "active")
+
+    def revoke_user(self, username):
+        self.change_status(username, "blocked")
+
     def change_role(self, username, new_role):
-        if messagebox.askyesno("Confirm", f"Change '{username}' to {new_role}?"):
+        if new_role not in ["admin", "user"]:
+            messagebox.showerror("Error", "Invalid role selected!")
+            return
+        if username == self.admin['username']:
+            messagebox.showerror("Protected", "You cannot change your own admin role while logged in.")
+            self.switch_view("users")
+            return
+
+        if messagebox.askyesno("Confirm Role Change", f"Change '{username}' role to {new_role}?"):
             conn = sqlite3.connect(self.auth.db_path)
             conn.execute("UPDATE users SET role = ? WHERE username = ?", (new_role, username))
             conn.commit()
             conn.close()
             self.audit.log(self.admin['username'], "ADMIN_ROLE_CHANGE", "SUCCESS", details=f"{username} → {new_role}")
-            self.switch_view("users")
-    
+        self.switch_view("users")
+
     def delete_user(self, username):
-        if messagebox.askyesno("⚠️ DANGER", f"PERMANENTLY delete '{username}'?"):
-            # 1. Delete user from database
+        if username == self.admin['username']:
+            messagebox.showerror("Protected", "You cannot delete the currently logged-in admin account.")
+            return
+
+        if messagebox.askyesno("⚠️ Delete User", f"Permanently delete '{username}'?\n\nThis removes the user account and related files."):
             conn = sqlite3.connect(self.auth.db_path)
             conn.execute("DELETE FROM users WHERE username = ?", (username,))
             conn.commit()
             conn.close()
 
-            # 2. Delete user's encrypted files and folder
-            user_enc_dir = f"storage/encrypted/{username}"
-            if os.path.exists(user_enc_dir):
-                try:
-                    shutil.rmtree(user_enc_dir)
-                    print(f"✅ Deleted encrypted folder: {user_enc_dir}")
-                except Exception as e:
-                    print(f"⚠️ Could not delete encrypted folder: {e}")
-
-            # 3. Delete user's signature files and folder
-            user_sig_dir = f"storage/signatures/{username}"
-            if os.path.exists(user_sig_dir):
-                try:
-                    shutil.rmtree(user_sig_dir)
-                    print(f"✅ Deleted signatures folder: {user_sig_dir}")
-                except Exception as e:
-                    print(f"⚠️ Could not delete signatures folder: {e}")
-
-            # 4. Delete user's key files
-            user_priv_key = f"storage/keystores/{username}_private.pem"
-            user_pub_key = f"storage/keystores/{username}_public.pem"
-            for key_file in [user_priv_key, user_pub_key]:
-                if os.path.exists(key_file):
+            for folder in [
+                f"storage/encrypted/{username}",
+                f"storage/signatures/{username}",
+            ]:
+                if os.path.exists(folder):
                     try:
-                        os.remove(key_file)
-                        print(f"✅ Deleted key: {key_file}")
+                        shutil.rmtree(folder)
+                        print(f"✅ Deleted folder: {folder}")
                     except Exception as e:
-                        print(f"⚠️ Could not delete key: {e}")
+                        print(f"⚠️ Could not delete folder {folder}: {e}")
 
-            # 5. Delete user's certificate
-            user_cert = f"storage/certs/{username}_cert.pem"
-            if os.path.exists(user_cert):
-                try:
-                    os.remove(user_cert)
-                    print(f"✅ Deleted certificate: {user_cert}")
-                except Exception as e:
-                    print(f"⚠️ Could not delete certificate: {e}")
+            for file_path in [
+                f"storage/keystores/{username}_private.pem",
+                f"storage/keystores/{username}_public.pem",
+                f"storage/certs/{username}_cert.pem",
+            ]:
+                if os.path.exists(file_path):
+                    try:
+                        os.remove(file_path)
+                        print(f"✅ Deleted file: {file_path}")
+                    except Exception as e:
+                        print(f"⚠️ Could not delete file {file_path}: {e}")
 
-            # 6. Clean up audit logs and file tracking for this user
             try:
                 conn = sqlite3.connect("storage/audit.db")
                 conn.execute("DELETE FROM audit_log WHERE username = ?", (username,))
@@ -1140,13 +1434,13 @@ class AdminDashboard:
                 conn.execute("DELETE FROM user_activity WHERE username = ?", (username,))
                 conn.commit()
                 conn.close()
-                print(f"✅ Cleaned audit data for: {username}")
             except Exception as e:
                 print(f"⚠️ Could not clean audit data: {e}")
 
             self.audit.log(self.admin['username'], "ADMIN_DELETE", "SUCCESS", details=f"Deleted: {username}")
+            messagebox.showinfo("Deleted", f"User '{username}' deleted successfully!")
             self.switch_view("users")
-    
+
     def export_logs(self):
         import csv
         from datetime import datetime
