@@ -23,21 +23,21 @@ def convert_to_pdf(input_file):
 
         if DOCX_AVAILABLE:
             try:
-                print("📄 Auto converting to PDF...")
+                print("Auto converting to PDF...")
                 convert(input_file, output_pdf)
-                print(f"✅ Converted → {output_pdf}")
+                print(f"Converted → {output_pdf}")
                 return output_pdf
             except Exception as e:
                 print(f"⚠️ Conversion failed: {e}")
 
     
-        print("\n⚠️ AUTO-CONVERT NOT AVAILABLE")
-        print("👉 Please convert manually:")
-        print("   Open file → Save As → PDF ✅")
+        print("\n AUTO-CONVERT NOT AVAILABLE")
+        print("Please convert manually:")
+        print("   Open file → Save As → PDF")
 
         return None
 
 
     else:
-        print("⚠️ Unsupported file type for conversion")
+        print("Unsupported file type for conversion")
         return None
