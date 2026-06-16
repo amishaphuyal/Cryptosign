@@ -17,7 +17,6 @@ class AuditLogger:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        # Create audit_log table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS audit_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +31,6 @@ class AuditLogger:
             )
         """)
 
-        # Create user_activity table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS user_activity (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +41,6 @@ class AuditLogger:
             )
         """)
 
-        # ✅ NEW: Create user_files table for My Documents
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS user_files (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,7 +56,7 @@ class AuditLogger:
 
         conn.commit()
         conn.close()
-        print("✅ Audit database initialized")
+        print("Audit database initialized")
 
     def log(self, username, action, result, file_name=None, file_hash=None, details=None):
         """Log a cryptographic operation."""
@@ -73,11 +70,10 @@ class AuditLogger:
             conn.commit()
             conn.close()
         except Exception as e:
-            print(f"⚠️ Audit log warning: {e}")
-            # Don't crash the app if logging fails
+            print(f"Audit log warning: {e}")
 
     def add_user_file(self, username, file_type, file_path, original_name=None, file_size=0):
-        """✅ NEW: Track user file for My Documents"""
+        """NEW: Track user file for My Documents"""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
@@ -88,12 +84,12 @@ class AuditLogger:
                   original_name or os.path.basename(file_path), file_size, 'active'))
             conn.commit()
             conn.close()
-            print(f"✅ File tracked: {original_name} ({file_type})")
+            print(f"File tracked: {original_name} ({file_type})")
         except Exception as e:
-            print(f"⚠️ File tracking warning: {e}")
+            print(f"File tracking warning: {e}")
 
     def get_user_files(self, username, file_type=None):
-        """✅ NEW: Get all files for a user"""
+        """NEW: Get all files for a user"""
         try:
             conn = sqlite3.connect(self.db_path)
             if file_type:
@@ -114,11 +110,11 @@ class AuditLogger:
             conn.close()
             return results
         except Exception as e:
-            print(f"⚠️ Get user files error: {e}")
+            print(f"Get user files error: {e}")
             return []
 
     def delete_user_file(self, username, file_path):
-        """✅ NEW: Mark file as deleted"""
+        """NEW: Mark file as deleted"""
         try:
             conn = sqlite3.connect(self.db_path)
             conn.execute("""
@@ -129,7 +125,7 @@ class AuditLogger:
             conn.close()
             return True
         except Exception as e:
-            print(f"⚠️ Delete file error: {e}")
+            print(f"Delete file error: {e}")
             return False
 
     def get_user_history(self, username, limit=50):
@@ -147,7 +143,7 @@ class AuditLogger:
             conn.close()
             return results
         except Exception as e:
-            print(f"⚠️ Audit history error: {e}")
+            print(f"Audit history error: {e}")
             return []
 
     def get_statistics(self, username=None):
@@ -170,7 +166,7 @@ class AuditLogger:
             conn.close()
             return results
         except Exception as e:
-            print(f"⚠️ Audit stats error: {e}")
+            print(f"Audit stats error: {e}")
             return []
 
     def export_to_csv(self, filepath, username=None):
@@ -191,5 +187,5 @@ class AuditLogger:
                 writer.writerows(rows)
             return filepath
         except Exception as e:
-            print(f"⚠️ Audit export error: {e}")
+            print(f"Audit export error: {e}")
             return None
