@@ -10,21 +10,17 @@ from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
 
 def sign_document(file_path, private_key_path, username, password=None, audit_logger=None):
     """
-    ✅ FIXED: Create external .sig file with digital signature + metadata
+    FIXED: Create external .sig file with digital signature + metadata
     Also tracks file in database for My Documents
     """
-    # Read file
     with open(file_path, 'rb') as f:
         file_data = f.read()
 
-    # Hash
     file_hash = hashlib.sha256(file_data).digest()
 
-    # Load private key
     with open(private_key_path, 'rb') as f:
         private_key = serialization.load_pem_private_key(f.read(), password=password)
 
-    # Sign
     signature = private_key.sign(
         file_hash,
         padding.PSS(
@@ -34,7 +30,6 @@ def sign_document(file_path, private_key_path, username, password=None, audit_lo
         Prehashed(hashes.SHA256())
     )
 
-    # Load certificate
     cert_path = f"storage/certs/{username}_cert.pem"
     cert_data = ""
     if os.path.exists(cert_path):
@@ -44,7 +39,6 @@ def sign_document(file_path, private_key_path, username, password=None, audit_lo
     signature_b64 = base64.b64encode(signature).decode('utf-8')
     hash_b64 = base64.b64encode(file_hash).decode('utf-8')
 
-    # Create .sig file with metadata
     sig_data = {
         'signature': base64.b64encode(signature).decode('utf-8'),
         'file_hash': base64.b64encode(file_hash).decode('utf-8'),
@@ -57,7 +51,6 @@ def sign_document(file_path, private_key_path, username, password=None, audit_lo
         'signing_tool': 'CryptoSign v1.0'
     }
 
-    # Save .sig file in user-specific directory
     user_sig_dir = f"storage/signatures/{username}"
     os.makedirs(user_sig_dir, exist_ok=True)
 
@@ -68,12 +61,10 @@ def sign_document(file_path, private_key_path, username, password=None, audit_lo
     with open(sig_path, 'w') as f:
         json.dump(sig_data, f, indent=2)
 
-    # ✅ ALSO save to original location for backward compatibility
     orig_sig_path = os.path.splitext(file_path)[0] + ".sig"
     with open(orig_sig_path, 'w') as f:
         json.dump(sig_data, f, indent=2)
 
-    # ✅ TRACK IN DATABASE if audit_logger provided
     if audit_logger:
         audit_logger.add_user_file(
             username=username,
@@ -83,5 +74,5 @@ def sign_document(file_path, private_key_path, username, password=None, audit_lo
             file_size=len(file_data)
         )
 
-    print(f"✅ External signature created: {sig_path}")
+    print(f"External signature created: {sig_path}")
     return sig_path
