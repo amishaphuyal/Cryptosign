@@ -11,12 +11,10 @@ def issue_certificate(ca_private_key, public_key, username):
 
     os.makedirs("storage/certs", exist_ok=True)
 
-    # ✅ SUBJECT (USER)
     subject = x509.Name([
         x509.NameAttribute(NameOID.COMMON_NAME, username),
     ])
 
-    # ✅ ✅ FIX: ISSUER MUST BE CA ✅
     issuer = x509.Name([
         x509.NameAttribute(NameOID.COMMON_NAME, "CryptoSign Root CA"),
     ])
@@ -27,7 +25,7 @@ def issue_certificate(ca_private_key, public_key, username):
     cert = (
         x509.CertificateBuilder()
         .subject_name(subject)
-        .issuer_name(issuer)   # ✅ IMPORTANT FIX
+        .issuer_name(issuer)  
         .public_key(public_key)
         .serial_number(x509.random_serial_number())
         .not_valid_before(valid_from)
@@ -44,4 +42,4 @@ def issue_certificate(ca_private_key, public_key, username):
     with open(cert_path, "wb") as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))
 
-    print(f"✅ X.509 Certificate issued for {username}")
+    print(f"X.509 Certificate issued for {username}")
