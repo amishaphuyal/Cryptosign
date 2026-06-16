@@ -8,12 +8,11 @@ import os
 
 def create_root_ca():
 
-    print("\n🏛️ Creating Root Certificate Authority (CA)...")
-    print("   Algorithm: RSA-2048")
+    print("\n Creating Root Certificate Authority (CA)...")
+    print("Algorithm: RSA-2048")
 
     os.makedirs("storage/ca", exist_ok=True)
 
-    # ✅ Generate Private Key
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048
@@ -21,7 +20,6 @@ def create_root_ca():
 
     public_key = private_key.public_key()
 
-    # ✅ Build REAL CA Certificate
     subject = issuer = x509.Name([
         x509.NameAttribute(NameOID.COUNTRY_NAME, u"NP"),
         x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"CryptoSign CA"),
@@ -45,7 +43,6 @@ def create_root_ca():
         .sign(private_key, hashes.SHA256())
     )
 
-    # ✅ Save Private Key
     with open("storage/ca/ca_private.pem", "wb") as f:
         f.write(
             private_key.private_bytes(
@@ -55,15 +52,11 @@ def create_root_ca():
             )
         )
 
-    # ✅ ✅ IMPORTANT: Save CERTIFICATE (NOT PUBLIC KEY)
     with open("storage/ca/ca_cert.pem", "wb") as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))
 
-    print("✅ CA Private Key created")
-    print("✅ CA Certificate created ✅🔥")
-
-
-# ✅ LOAD FUNCTIONS (UPDATED)
+    print("CA Private Key created")
+    print("CA Certificate created ")
 
 def load_ca_private_key():
     with open("storage/ca/ca_private.pem", "rb") as f:
