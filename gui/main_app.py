@@ -19,7 +19,6 @@ from core.audit_logger import AuditLogger
 from core.batch_sign import create_batch_dialog
 from core.history_viewer import show_history_dialog
 
-# Colors
 COLORS = {
     "bg": "#0a0e1a", "card": "#111827", "accent": "#6366f1",
     "accent_hover": "#4f46e5", "accent_text": "#ffffff",
@@ -61,7 +60,6 @@ class CryptoSignApp:
         self.main_frame = ctk.CTkFrame(self.root, fg_color=COLORS["bg"])
         self.main_frame.pack(fill="both", expand=True, padx=30, pady=20)
 
-        # ===== HEADER =====
         header = ctk.CTkFrame(self.main_frame, fg_color="transparent")
         header.pack(fill="x", pady=(0, 20))
         ctk.CTkLabel(header, text="CryptoSign  |  Digital Document Signing Tool",
@@ -70,14 +68,12 @@ class CryptoSignApp:
         accent_line = ctk.CTkFrame(self.main_frame, fg_color=COLORS["accent"], height=3)
         accent_line.pack(fill="x", pady=(0, 20))
 
-        # ===== USER SETUP (with Password) =====
         user_frame = ctk.CTkFrame(self.main_frame, fg_color=COLORS["card"], corner_radius=12)
         user_frame.pack(fill="x", pady=10)
 
         ctk.CTkLabel(user_frame, text="👤  User Setup", font=("Inter", 16, "bold"),
                     text_color=COLORS["text"]).pack(anchor="w", padx=20, pady=(15, 10))
 
-        # Username row
         user_row = ctk.CTkFrame(user_frame, fg_color="transparent")
         user_row.pack(fill="x", padx=20, pady=(0, 8))
 
@@ -88,7 +84,6 @@ class CryptoSignApp:
                                           text_color=COLORS["text"], corner_radius=8)
         self.username_entry.pack(side="left", padx=(0, 10))
 
-        # Password row
         pass_row = ctk.CTkFrame(user_frame, fg_color="transparent")
         pass_row.pack(fill="x", padx=20, pady=(0, 15))
 
@@ -99,7 +94,6 @@ class CryptoSignApp:
                                           text_color=COLORS["text"], corner_radius=8, show="*")
         self.password_entry.pack(side="left", padx=(0, 10))
 
-        # Show password checkbox
         self.show_pass_var = ctk.BooleanVar(value=False)
         ctk.CTkCheckBox(pass_row, text="Show", variable=self.show_pass_var,
                        command=self.toggle_password_visibility, font=("Inter", 11),
@@ -111,7 +105,6 @@ class CryptoSignApp:
                      hover_color=COLORS["accent_hover"], text_color=COLORS["accent_text"],
                      corner_radius=8, command=self.set_user).pack(side="left")
 
-        # ===== SIGNATURE MODE =====
         mode_frame = ctk.CTkFrame(self.main_frame, fg_color=COLORS["card"], corner_radius=12)
         mode_frame.pack(fill="x", pady=10)
 
@@ -135,7 +128,6 @@ class CryptoSignApp:
         self.mode_dropdown.pack(side="left")
         self.mode_dropdown.set("-- Select Mode --")
 
-        # ===== QUICK ACTIONS =====
         actions_frame = ctk.CTkFrame(self.main_frame, fg_color=COLORS["card"], corner_radius=12)
         actions_frame.pack(fill="both", expand=True, pady=10)
 
@@ -169,18 +161,14 @@ class CryptoSignApp:
         self.create_btn(row4, "📦  Batch Sign", self.batch_sign, COLORS["accent"], COLORS["accent_hover"], COLORS["accent_text"])
         self.create_btn(row4, "📜  History", self.show_history, COLORS["accent"], COLORS["accent_hover"], COLORS["accent_text"])
 
-        # Row 5 - Revoke + Admin Panel (if admin)
         row5 = ctk.CTkFrame(grid, fg_color="transparent")
         row5.pack(fill="x", pady=6)
 
-        # Revoke User (always)
         self.create_btn(row5, "❌  Revoke User", self.revoke, COLORS["danger"], COLORS["danger_hover"], COLORS["danger_text"])
 
-        # Admin Panel (only if admin)
         if self.is_admin:
             self.create_btn(row5, "⚙️  Admin Panel", self.open_admin, "#ef4444", "#dc2626", "#ffffff")
 
-        # ===== STATUS BAR =====
         status_frame = ctk.CTkFrame(self.main_frame, fg_color=COLORS["card"], corner_radius=10)
         status_frame.pack(fill="x", pady=(15, 0))
 
