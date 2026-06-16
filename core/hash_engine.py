@@ -7,6 +7,6 @@ def generate_hash(file_path):
 
     sha256 = hashlib.sha256(data).hexdigest()
 
-    print("🔐 File Hash (SHA-256):", sha256)
+    print("File Hash (SHA-256):", sha256)
 
     return sha256
