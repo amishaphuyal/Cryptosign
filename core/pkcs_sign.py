@@ -14,19 +14,16 @@ def sign_pdf_pkcs(input_pdf, username, password=None):
     """
     output_pdf = input_pdf.replace(".pdf", "_signed.pdf")
 
-    # Load signer with password if provided
     signer = signers.SimpleSigner.load(
         key_file=f"storage/keystores/{username}_private.pem",
         cert_file=f"storage/certs/{username}_cert.pem",
         key_passphrase=password.encode('utf-8') if password else None
     )
 
-    # Proper PKCS metadata
     meta = PdfSignatureMetadata(
         field_name="Signature1"
     )
 
-    # REAL signer engine with visual appearance
     pdf_signer = PdfSigner(
         meta,
         signer=signer,
@@ -37,7 +34,6 @@ def sign_pdf_pkcs(input_pdf, username, password=None):
         )
     )
 
-    # Try direct sign
     try:
         with open(input_pdf, "rb") as inf:
             writer = IncrementalPdfFileWriter(inf)
@@ -45,14 +41,13 @@ def sign_pdf_pkcs(input_pdf, username, password=None):
             with open(output_pdf, "wb") as outf:
                 pdf_signer.sign_pdf(writer, output=outf)
 
-        print("✅ Direct PKCS signing successful")
-        print(f"✅ FINAL FILE: {output_pdf}")
+        print("Direct PKCS signing successful")
+        print(f"FINAL FILE: {output_pdf}")
         return output_pdf
 
     except SigningError:
         print("⚠️ Hybrid PDF detected → applying safe fix")
 
-    # Safe clean (NO STRUCTURE DAMAGE)
     temp_pdf = input_pdf.replace(".pdf", "_clean.pdf")
 
     reader = PdfReader(input_pdf)
@@ -66,17 +61,16 @@ def sign_pdf_pkcs(input_pdf, username, password=None):
     with open(temp_pdf, "wb") as f:
         writer2.write(f)
 
-    # Sign clean file
     with open(temp_pdf, "rb") as inf:
         writer = IncrementalPdfFileWriter(inf)
 
         with open(output_pdf, "wb") as outf:
             pdf_signer.sign_pdf(writer, output=outf)
 
-    print("✅ Clean PDF signed successfully")
-    print(f"✅ FINAL FILE: {output_pdf}")
+    print("Clean PDF signed successfully")
+    print(f"FINAL FILE: {output_pdf}")
 
-    # Cleanup
+
     if os.path.exists(temp_pdf):
         os.remove(temp_pdf)
     
