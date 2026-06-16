@@ -17,9 +17,8 @@ class LoginDialog:
         self.dialog.title("CryptoSign - Secure Login")
         self.dialog.geometry("420x680")
         self.dialog.configure(fg_color="#0a0e1a")
-        self.dialog.resizable(True, True)  # ✅ Maximize/minimize allow
+        self.dialog.resizable(True, True) 
         
-        # Center window
         self.dialog.update_idletasks()
         x = (self.dialog.winfo_screenwidth() - 420) // 2
         y = (self.dialog.winfo_screenheight() - 680) // 2
@@ -32,13 +31,12 @@ class LoginDialog:
     
     def build_ui(self):
         # Logo & Header
-        ctk.CTkLabel(self.scroll_frame, text="🔐", font=("Inter", 48)).pack(pady=(30, 5))
+        ctk.CTkLabel(self.scroll_frame, text="", font=("Inter", 48)).pack(pady=(30, 5))
         ctk.CTkLabel(self.scroll_frame, text="CryptoSign", font=("Inter", 26, "bold"), 
                     text_color="#6366f1").pack()
         ctk.CTkLabel(self.scroll_frame, text="Secure Digital Document Signing",
                     font=("Inter", 12), text_color="#64748b").pack(pady=(5, 25))
         
-        # Toggle Frame
         toggle = ctk.CTkFrame(self.scroll_frame, fg_color="#111827", corner_radius=25)
         toggle.pack(fill="x", padx=35, pady=15)
         
@@ -54,7 +52,6 @@ class LoginDialog:
                                          command=self.show_register)
         self.register_btn.pack(side="right", expand=True, padx=5, pady=5)
         
-        # Form Container
         self.form_frame = ctk.CTkFrame(self.scroll_frame, fg_color="transparent")
         self.form_frame.pack(fill="both", expand=True, padx=35, pady=(0, 20))
         
@@ -67,7 +64,6 @@ class LoginDialog:
         for w in self.form_frame.winfo_children():
             w.destroy()
         
-        # Username
         ctk.CTkLabel(self.form_frame, text="Username", font=("Inter", 12, "bold"),
                     text_color="#f8fafc").pack(anchor="w", pady=(10, 5))
         self.l_user = ctk.CTkEntry(self.form_frame, height=48, font=("Inter", 14),
@@ -76,7 +72,6 @@ class LoginDialog:
                                     placeholder_text="Enter your username")
         self.l_user.pack(fill="x", pady=(0, 15))
         
-        # Password with eye toggle
         ctk.CTkLabel(self.form_frame, text="Password", font=("Inter", 12, "bold"),
                     text_color="#f8fafc").pack(anchor="w", pady=(5, 5))
         
@@ -96,7 +91,6 @@ class LoginDialog:
                                     command=self.toggle_login_pass)
         self.eye_btn.pack(side="right", padx=(5, 0))
         
-        # Remember me & Forgot password
         options = ctk.CTkFrame(self.form_frame, fg_color="transparent")
         options.pack(fill="x", pady=(10, 15))
         
@@ -109,8 +103,7 @@ class LoginDialog:
                      font=("Inter", 11), fg_color="transparent", hover_color="#1e293b",
                      text_color="#6366f1", command=self.forgot_password).pack(side="right")
         
-        # Login Button
-        ctk.CTkButton(self.form_frame, text="🔐  Sign In", height=50,
+        ctk.CTkButton(self.form_frame, text="Sign In", height=50,
                      font=("Inter", 15, "bold"), fg_color="#6366f1",
                      hover_color="#4f46e5", corner_radius=12,
                      command=self.do_login).pack(fill="x", pady=(5, 15))
@@ -122,7 +115,6 @@ class LoginDialog:
         for w in self.form_frame.winfo_children():
             w.destroy()
         
-        # Username
         ctk.CTkLabel(self.form_frame, text="Username", font=("Inter", 12, "bold"),
                     text_color="#f8fafc").pack(anchor="w", pady=(8, 5))
         self.r_user = ctk.CTkEntry(self.form_frame, height=48, font=("Inter", 14),
@@ -134,7 +126,6 @@ class LoginDialog:
         self.user_status = ctk.CTkLabel(self.form_frame, text="", font=("Inter", 11))
         self.user_status.pack(anchor="w", pady=(0, 5))
         
-        # Email
         ctk.CTkLabel(self.form_frame, text="Email", font=("Inter", 12, "bold"),
                     text_color="#f8fafc").pack(anchor="w", pady=(5, 5))
         self.r_email = ctk.CTkEntry(self.form_frame, height=48, font=("Inter", 14),
@@ -146,7 +137,6 @@ class LoginDialog:
         self.email_status = ctk.CTkLabel(self.form_frame, text="", font=("Inter", 11))
         self.email_status.pack(anchor="w", pady=(0, 5))
         
-        # Password with eye toggle
         ctk.CTkLabel(self.form_frame, text="Password", font=("Inter", 12, "bold"),
                     text_color="#f8fafc").pack(anchor="w", pady=(5, 5))
         
@@ -167,7 +157,6 @@ class LoginDialog:
                                         command=self.toggle_reg_pass)
         self.r_eye_btn.pack(side="right", padx=(5, 0))
         
-        # Password Strength Bar
         self.strength_frame = ctk.CTkFrame(self.form_frame, fg_color="transparent")
         self.strength_frame.pack(fill="x", pady=(5, 2))
         
@@ -180,7 +169,6 @@ class LoginDialog:
                                           font=("Inter", 11), text_color="#64748b")
         self.strength_label.pack(anchor="w", pady=(0, 5))
         
-        # Confirm Password with eye toggle
         ctk.CTkLabel(self.form_frame, text="Confirm Password", font=("Inter", 12, "bold"),
                     text_color="#f8fafc").pack(anchor="w", pady=(5, 5))
         
@@ -200,60 +188,55 @@ class LoginDialog:
                                            command=self.toggle_conf_pass)
         self.conf_eye_btn.pack(side="right", padx=(5, 0))
         
-        # Match indicator
         self.match_label = ctk.CTkLabel(self.form_frame, text="", font=("Inter", 11))
         self.match_label.pack(anchor="w", pady=(0, 5))
         self.r_confirm.bind("<KeyRelease>", lambda e: self.check_match())
         
-        # Terms checkbox
         self.terms_var = ctk.BooleanVar(value=False)
         ctk.CTkCheckBox(self.form_frame, text="I agree to Terms & Conditions", variable=self.terms_var,
                        font=("Inter", 11), text_color="#94a3b8",
                        fg_color="#6366f1", hover_color="#4f46e5").pack(anchor="w", pady=(5, 12))
         
-        # Register Button
-        ctk.CTkButton(self.form_frame, text="🔐  Create Account", height=50,
+        ctk.CTkButton(self.form_frame, text="Create Account", height=50,
                      font=("Inter", 15, "bold"), fg_color="#10b981",
                      hover_color="#059669", corner_radius=12,
                      command=self.do_register).pack(fill="x", pady=(5, 0))
     
-    # ===== PASSWORD TOGGLES =====
     def toggle_login_pass(self):
         show = "" if self.l_pass.cget("show") == "*" else "*"
         self.l_pass.configure(show=show)
-        self.eye_btn.configure(text="🙈" if show == "" else "👁")
+        self.eye_btn.configure(text="" if show == "" else "👁")
     
     def toggle_reg_pass(self):
         show = "" if self.r_pass.cget("show") == "*" else "*"
         self.r_pass.configure(show=show)
-        self.r_eye_btn.configure(text="🙈" if show == "" else "👁")
+        self.r_eye_btn.configure(text="" if show == "" else "👁")
     
     def toggle_conf_pass(self):
         show = "" if self.r_confirm.cget("show") == "*" else "*"
         self.r_confirm.configure(show=show)
-        self.conf_eye_btn.configure(text="🙈" if show == "" else "👁")
+        self.conf_eye_btn.configure(text="" if show == "" else "👁")
     
-    # ===== VALIDATION =====
     def validate_username(self):
         username = self.r_user.get().strip()
         if len(username) < 3:
-            self.user_status.configure(text="❌ Min 3 characters", text_color="#ef4444")
+            self.user_status.configure(text="Min 3 characters", text_color="#ef4444")
             return False
         if not re.match(r'^[a-zA-Z0-9_]+$', username):
-            self.user_status.configure(text="❌ Letters, numbers, underscore only", text_color="#ef4444")
+            self.user_status.configure(text="Letters, numbers, underscore only", text_color="#ef4444")
             return False
-        self.user_status.configure(text="✅ Valid username", text_color="#10b981")
+        self.user_status.configure(text="Valid username", text_color="#10b981")
         return True
     
     def validate_email(self):
         email = self.r_email.get().strip()
         if not email:
-            self.email_status.configure(text="❌ Email required", text_color="#ef4444")
+            self.email_status.configure(text="Email required", text_color="#ef4444")
             return False
         if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
-            self.email_status.configure(text="❌ Invalid email format", text_color="#ef4444")
+            self.email_status.configure(text="Invalid email format", text_color="#ef4444")
             return False
-        self.email_status.configure(text="✅ Valid email", text_color="#10b981")
+        self.email_status.configure(text="Valid email", text_color="#10b981")
         return True
     
     def check_password_strength(self):
@@ -281,13 +264,12 @@ class LoginDialog:
     
     def check_match(self):
         if self.r_pass.get() == self.r_confirm.get() and self.r_pass.get():
-            self.match_label.configure(text="✅ Passwords match", text_color="#10b981")
+            self.match_label.configure(text="Passwords match", text_color="#10b981")
             return True
         else:
-            self.match_label.configure(text="❌ Passwords don't match", text_color="#ef4444")
+            self.match_label.configure(text="Passwords don't match", text_color="#ef4444")
             return False
     
-    # ===== ACTIONS =====
     def do_login(self):
         username = self.l_user.get().strip()
         password = self.l_pass.get()
