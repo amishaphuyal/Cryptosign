@@ -31,7 +31,6 @@ class AuthSystem:
             )
         """)
         
-        # Default admin password: amisha@admin
         cursor.execute("""
             INSERT OR IGNORE INTO users (username, password_hash, role, created_at, first_login)
             VALUES (?, ?, ?, ?, ?)
@@ -52,7 +51,6 @@ class AuthSystem:
             cursor.execute("ALTER TABLE users ADD COLUMN first_login INTEGER DEFAULT 0")
             cursor.execute("UPDATE users SET first_login = 1 WHERE username = 'admin'")
         
-        # Convert old revoked account status to the new admin-dashboard status model.
         cursor.execute("UPDATE users SET status = 'blocked' WHERE status = 'revoked'")
         conn.commit()
         conn.close()
