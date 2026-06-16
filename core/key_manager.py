@@ -10,7 +10,7 @@ def generate_key_pair(username, password=None):
     """
     os.makedirs("storage/keystores", exist_ok=True)
 
-    print("\n🔐 Generating RSA KEY PAIRS...\n")
+    print("\n Generating RSA KEY PAIRS...\n")
     print("   Algorithm: RSA-2048")
     print("   Usage: Signing + Encryption")
 
@@ -21,7 +21,6 @@ def generate_key_pair(username, password=None):
 
     public_key = private_key.public_key()
 
-    # ✅ Save private key (encrypted if password provided)
     priv_path = f"storage/keystores/{username}_private.pem"
 
     if password:
@@ -34,7 +33,7 @@ def generate_key_pair(username, password=None):
         )
         with open(priv_path, "wb") as f:
             f.write(encrypted_private)
-        print("   ✅ Private key ENCRYPTED with password")
+        print("Private key ENCRYPTED with password")
     else:
         unencrypted_private = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
@@ -45,7 +44,6 @@ def generate_key_pair(username, password=None):
             f.write(unencrypted_private)
         print("   ⚠️ Private key saved (unencrypted)")
 
-    # ✅ Save public key (always unencrypted)
     pub_path = f"storage/keystores/{username}_public.pem"
     with open(pub_path, "wb") as f:
         f.write(
@@ -55,9 +53,9 @@ def generate_key_pair(username, password=None):
             )
         )
 
-    print(f"\n   ✅ Private key saved → {priv_path}")
-    print(f"   ✅ Public key saved → {pub_path}")
-    print("\n🔥 RSA KEY GENERATION COMPLETE 🔥")
+    print(f"\n Private key saved → {priv_path}")
+    print(f" Public key saved → {pub_path}")
+    print("\n RSA KEY GENERATION COMPLETE")
 
     return private_key, public_key
 
@@ -72,13 +70,11 @@ def load_private_key(username, password=None):
     with open(priv_path, "rb") as f:
         key_data = f.read()
 
-    # Try without password first (backward compatibility)
     try:
         return serialization.load_pem_private_key(key_data, password=None)
     except Exception:
         pass
 
-    # Try with password
     if password:
         try:
             return serialization.load_pem_private_key(key_data, password=password.encode('utf-8'))
