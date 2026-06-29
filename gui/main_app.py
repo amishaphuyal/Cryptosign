@@ -50,7 +50,6 @@ class CryptoSignApp:
         self.build_ui()
         self.setup_shortcuts()
 
-        # Auto-fill username if logged in
         if self.username:
             self.username_entry.insert(0, self.username)
             self.user_info.configure(text=f"User: {self.username}")
@@ -137,29 +136,25 @@ class CryptoSignApp:
         grid = ctk.CTkFrame(actions_frame, fg_color="transparent")
         grid.pack(fill="both", expand=True, padx=20, pady=(0, 15))
 
-        # Row 1
         row1 = ctk.CTkFrame(grid, fg_color="transparent")
         row1.pack(fill="x", pady=6)
         self.create_btn(row1, "⚙️  Setup User", self.setup, COLORS["accent"], COLORS["accent_hover"], COLORS["accent_text"])
         self.create_btn(row1, "📝  Sign File", self.sign, COLORS["accent"], COLORS["accent_hover"], COLORS["accent_text"])
 
-        # Row 2
         row2 = ctk.CTkFrame(grid, fg_color="transparent")
         row2.pack(fill="x", pady=6)
         self.create_btn(row2, "✅  Verify File", self.verify, COLORS["success"], COLORS["success_hover"], COLORS["success_text"])
         self.create_btn(row2, "🔐  Encrypt File", self.encrypt, COLORS["accent"], COLORS["accent_hover"], COLORS["accent_text"])
 
-        # Row 3
         row3 = ctk.CTkFrame(grid, fg_color="transparent")
         row3.pack(fill="x", pady=6)
         self.create_btn(row3, "🔓  Decrypt File", self.decrypt, COLORS["accent"], COLORS["accent_hover"], COLORS["accent_text"])
         self.create_btn(row3, "🔍  File Hash", self.generate_hash, COLORS["warning"], COLORS["warning_hover"], COLORS["warning_text"])
 
-        # Row 4 - Batch + History
         row4 = ctk.CTkFrame(grid, fg_color="transparent")
         row4.pack(fill="x", pady=6)
-        self.create_btn(row4, "📦  Batch Sign", self.batch_sign, COLORS["accent"], COLORS["accent_hover"], COLORS["accent_text"])
-        self.create_btn(row4, "📜  History", self.show_history, COLORS["accent"], COLORS["accent_hover"], COLORS["accent_text"])
+        self.create_btn(row4, "Batch Sign", self.batch_sign, COLORS["accent"], COLORS["accent_hover"], COLORS["accent_text"])
+        self.create_btn(row4, "History", self.show_history, COLORS["accent"], COLORS["accent_hover"], COLORS["accent_text"])
 
         row5 = ctk.CTkFrame(grid, fg_color="transparent")
         row5.pack(fill="x", pady=6)
@@ -167,7 +162,7 @@ class CryptoSignApp:
         self.create_btn(row5, "❌  Revoke User", self.revoke, COLORS["danger"], COLORS["danger_hover"], COLORS["danger_text"])
 
         if self.is_admin:
-            self.create_btn(row5, "⚙️  Admin Panel", self.open_admin, "#ef4444", "#dc2626", "#ffffff")
+            self.create_btn(row5, "Admin Panel", self.open_admin, "#ef4444", "#dc2626", "#ffffff")
 
         status_frame = ctk.CTkFrame(self.main_frame, fg_color=COLORS["card"], corner_radius=10)
         status_frame.pack(fill="x", pady=(15, 0))
