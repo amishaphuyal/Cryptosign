@@ -9,19 +9,23 @@ import os
 
 def sign_pdf_pkcs(input_pdf, username, password=None):
     """
-    Sign PDF with PKCS#7 embedded signature - Adobe compatible!
-    Returns output path
+    Sign PDF with PKCS#7 embedded signature.
+    This creates a real embedded PDF digital signature.
     """
+
     output_pdf = input_pdf.replace(".pdf", "_signed.pdf")
 
     signer = signers.SimpleSigner.load(
-        key_file=f"storage/keystores/{username}_private.pem",
-        cert_file=f"storage/certs/{username}_cert.pem",
-        key_passphrase=password.encode('utf-8') if password else None
-    )
+    key_file=f"storage/keystores/{username}_private.pem",
+    cert_file=f"storage/certs/{username}_cert.pem",
+    ca_chain_files=("storage/ca/ca_cert.pem",),
+    key_passphrase=password.encode("utf-8") if password else None
+)
 
     meta = PdfSignatureMetadata(
-        field_name="Signature1"
+        field_name="Signature1",
+        reason="Document digitally signed using CryptoSign",
+        location="CryptoSign Application"
     )
 
     pdf_signer = PdfSigner(
@@ -29,8 +33,8 @@ def sign_pdf_pkcs(input_pdf, username, password=None):
         signer=signer,
         new_field_spec=SigFieldSpec(
             sig_field_name="Signature1",
-            box=(50, 50, 250, 150),  # Bigger box for signature
-            on_page=0  # First page
+            box=(50, 50, 250, 150),
+            on_page=0
         )
     )
 
@@ -46,7 +50,7 @@ def sign_pdf_pkcs(input_pdf, username, password=None):
         return output_pdf
 
     except SigningError:
-        print("⚠️ Hybrid PDF detected → applying safe fix")
+        print("Hybrid PDF detected → applying safe fix")
 
     temp_pdf = input_pdf.replace(".pdf", "_clean.pdf")
 
@@ -70,8 +74,7 @@ def sign_pdf_pkcs(input_pdf, username, password=None):
     print("Clean PDF signed successfully")
     print(f"FINAL FILE: {output_pdf}")
 
-
     if os.path.exists(temp_pdf):
         os.remove(temp_pdf)
-    
+
     return output_pdf
