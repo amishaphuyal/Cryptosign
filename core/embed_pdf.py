@@ -6,12 +6,22 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
 import base64
 from datetime import datetime
+from core.revocation import is_revoked
 
 
 def embed_pdf_signature(pdf_path, username, password=None, audit_logger=None):
-   
+
     if not os.path.exists(pdf_path):
         raise FileNotFoundError(f"PDF not found: {pdf_path}")
+
+    if is_revoked(username):
+        msg = "Signing blocked: your certificate is revoked. Contact admin to re-issue/activate your certificate."
+        if audit_logger:
+            try:
+                audit_logger.log(username, "SIGN", "BLOCKED", file_name=os.path.basename(pdf_path), details=msg)
+            except Exception:
+                pass
+        raise PermissionError(msg)
 
     private_key_path = f"storage/keystores/{username}_private.pem"
     cert_path = f"storage/certs/{username}_cert.pem"

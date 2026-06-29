@@ -9,6 +9,15 @@ def encrypt_file(file_path, public_key_path, username):
     FIXED: User-specific encrypted file storage
     Saves to: storage/encrypted/{username}/original_name.bin
     """
+    try:
+        from core.revocation import is_revoked
+        if is_revoked(username):
+            raise PermissionError("Operation blocked: user certificate is revoked. Encryption is not allowed.")
+    except PermissionError:
+        raise
+    except Exception as e:
+        print(f"Revocation check warning: {e}")
+
     user_enc_dir = f"storage/encrypted/{username}"
     os.makedirs(user_enc_dir, exist_ok=True)
 

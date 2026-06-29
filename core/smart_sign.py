@@ -2,6 +2,7 @@ import os
 from core.sign_engine import sign_document
 from core.pkcs_sign import sign_pdf_pkcs
 from core.auto_convert import convert_to_pdf
+from core.revocation import is_revoked
 
 
 def smart_sign(file_path, username, mode, password=None, audit_logger=None):
@@ -22,6 +23,16 @@ def smart_sign(file_path, username, mode, password=None, audit_logger=None):
         'output_file': None,
         'message': ''
     }
+
+    if is_revoked(username):
+        result['message'] = "Signing blocked: your certificate is revoked. Contact admin to re-issue/activate your certificate."
+        if audit_logger:
+            try:
+                audit_logger.log(username, "SIGN", "BLOCKED", file_name=file_name, details=result['message'])
+            except Exception:
+                pass
+        print(result['message'])
+        return result
 
     try:
         if mode == "external":
@@ -65,7 +76,7 @@ def smart_sign(file_path, username, mode, password=None, audit_logger=None):
                     result['success'] = True
                     result['output_file'] = output
                     result['message'] = f"Office file converted and signed: {os.path.basename(output)}"
-                    return output
+                    return result
 
                 else:
                     print("Conversion failed → using external signature")

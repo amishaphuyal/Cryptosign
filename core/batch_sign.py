@@ -3,6 +3,7 @@ from tkinter import filedialog
 import customtkinter as ctk
 
 from core.smart_sign import smart_sign
+from core.revocation import is_revoked
 
 
 def batch_sign_folder(username, mode, password=None, folder_path=None, file_types=None, progress_callback=None):
@@ -41,9 +42,22 @@ def batch_sign_folder(username, mode, password=None, folder_path=None, file_type
 
     total = len(files_to_sign)
 
+    if is_revoked(username):
+        msg = "Signing blocked: your certificate is revoked. Contact admin to re-issue/activate your certificate."
+        results['signed'] = 0
+        results['failed'] = total
+        results['blocked'] = True
+        results['errors'].append((folder_path, msg))
+        for file_path in files_to_sign:
+            results['files_processed'].append((file_path, 'BLOCKED'))
+        return results
+
     for i, file_path in enumerate(files_to_sign):
         try:
-            smart_sign(file_path, username, mode, password)
+            sign_result = smart_sign(file_path, username, mode, password)
+            if isinstance(sign_result, dict) and not sign_result.get('success', False):
+                raise PermissionError(sign_result.get('message', 'Signing failed'))
+
             results['signed'] += 1
             results['files_processed'].append((file_path, 'SUCCESS'))
         except Exception as e:

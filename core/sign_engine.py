@@ -3,6 +3,7 @@ import hashlib
 import json
 import base64
 from datetime import datetime
+from core.revocation import is_revoked
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
@@ -10,9 +11,18 @@ from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
 
 def sign_document(file_path, private_key_path, username, password=None, audit_logger=None):
     """
-    FIXED: Create external .sig file with digital signature + metadata
-    Also tracks file in database for My Documents
+    Create external .sig file with digital signature + metadata.
+    Revoked users are blocked before any signature is created.
     """
+    if is_revoked(username):
+        msg = "Signing blocked: your certificate is revoked. Contact admin to re-issue/activate your certificate."
+        if audit_logger:
+            try:
+                audit_logger.log(username, "SIGN", "BLOCKED", file_name=os.path.basename(file_path), details=msg)
+            except Exception:
+                pass
+        raise PermissionError(msg)
+
     with open(file_path, 'rb') as f:
         file_data = f.read()
 

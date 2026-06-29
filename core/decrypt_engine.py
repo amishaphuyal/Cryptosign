@@ -6,6 +6,15 @@ import os
 
 def decrypt_file(username, encrypted_file_path, password=None):
 
+    try:
+        from core.revocation import is_revoked
+        if is_revoked(username):
+            raise PermissionError("Operation blocked: user certificate is revoked. Decryption is not allowed.")
+    except PermissionError:
+        raise
+    except Exception as e:
+        print(f"Revocation check warning: {e}")
+
     print("\n Hybrid Decryption Started...")
 
     private_key_path = f"storage/keystores/{username}_private.pem"
