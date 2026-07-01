@@ -1,12 +1,6 @@
 <div align="center">
 
-<!-- ================= HEADER ================= -->
-
-<img src="https://img.shields.io/badge/CryptoSign-Secure%20Digital%20Signature%20Platform-6366F1?style=for-the-badge" alt="CryptoSign">
-
-<br><br>
-
-<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="90" height="90" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="120" height="120" rx="28" fill="#0F172A"/>
   <rect x="30" y="49" width="60" height="44" rx="10" fill="#6366F1"/>
   <path d="M40 49V39C40 27.9543 48.9543 19 60 19C71.0457 19 80 27.9543 80 39V49" stroke="#A5B4FC" stroke-width="8" stroke-linecap="round"/>
@@ -16,184 +10,49 @@
 
 # CryptoSign
 
-### Secure Digital Signature, Certificate Authority and Document Protection Platform
-
-<br>
+### Secure Digital Signature & Certificate Authority Platform
 
 <img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
 <img src="https://img.shields.io/badge/GUI-CustomTkinter-6366F1?style=flat-square" alt="CustomTkinter">
 <img src="https://img.shields.io/badge/RSA-2048-EF4444?style=flat-square" alt="RSA">
 <img src="https://img.shields.io/badge/AES-256--GCM-10B981?style=flat-square" alt="AES">
-<img src="https://img.shields.io/badge/Certificate-X.509-F59E0B?style=flat-square" alt="X.509">
-<img src="https://img.shields.io/badge/Database-SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
-
-<br><br>
-
-<b>A Python desktop application for secure document signing, certificate management, encryption, verification and audit logging.</b>
 
 </div>
 
 ---
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Application Preview](#application-preview)
-- [Key Features](#key-features)
-- [Technology Stack](#technology-stack)
-- [System Architecture](#system-architecture)
-- [Cryptographic Workflows](#cryptographic-workflows)
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [How to Run](#how-to-run)
-- [Usage Guide](#usage-guide)
-- [Security Controls](#security-controls)
-- [Core Modules](#core-modules)
-- [Supported Operations](#supported-operations)
-- [Future Enhancements](#future-enhancements)
-- [Author](#author)
-
----
-
 ## Overview
 
-CryptoSign is a secure desktop-based document signing and certificate management system developed using Python. The application allows users to generate RSA key pairs, issue X.509 certificates, digitally sign documents, verify signatures, encrypt and decrypt files, revoke users and maintain full audit logs of cryptographic operations.
-
-This project demonstrates practical implementation of Public Key Infrastructure, digital signatures, certificate authority, hybrid encryption, audit logging and secure document workflow management through a graphical user interface.
+CryptoSign is a Python desktop app for signing, verifying, encrypting and managing documents securely. It lets users generate RSA key pairs, issue X.509 certificates, sign and verify files, encrypt/decrypt data, and keep a full audit log — all through a simple GUI.
 
 ---
 
-## Application Preview
-
-The application interface includes login, user dashboard, admin dashboard, signing, verification, encryption and audit history screens.
+## Features
 
 <table>
 <tr>
-<td width="50%" align="center">
+<td width="33%" valign="top">
 
-### Login Interface
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
 
-<img src="assets/login.png" width="100%" alt="Login Interface">
-
-</td>
-<td width="50%" align="center">
-
-### User Dashboard
-
-<img src="assets/user_dashboard.png" width="100%" alt="User Dashboard">
+**Key & Certificate Management**
+RSA-2048 keys, password protection, X.509 certificate issuing via a built-in CA.
 
 </td>
-</tr>
+<td width="33%" valign="top">
 
-<tr>
-<td width="50%" align="center">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
 
-### Admin Dashboard
-
-<img src="assets/admin_dashboard.png" width="100%" alt="Admin Dashboard">
+**Signing & Verification**
+Sign PDFs and files, verify signatures, and check certificates before trusting them.
 
 </td>
-<td width="50%" align="center">
+<td width="33%" valign="top">
 
-### Sign Document
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0"/><circle cx="12" cy="16" r="1.5"/></svg>
 
-<img src="assets/sign_document.png" width="100%" alt="Sign Document">
-
-</td>
-</tr>
-
-<tr>
-<td width="50%" align="center">
-
-### Verify Document
-
-<img src="assets/verify_document.png" width="100%" alt="Verify Document">
-
-</td>
-<td width="50%" align="center">
-
-### Audit History
-
-<img src="assets/audit_history.png" width="100%" alt="Audit History">
-
-</td>
-</tr>
-</table>
-
-> Screenshot images should be placed inside the `assets/` folder using the same names shown above.
-
----
-
-## Key Features
-
-<table>
-<tr>
-<td width="50%">
-
-### Key Management
-
-- RSA-2048 public/private key generation
-- Password-protected private key support
-- Secure local key storage
-- Public key loading for verification and encryption
-
-</td>
-<td width="50%">
-
-### Certificate Authority
-
-- Root Certificate Authority generation
-- X.509 certificate issuing
-- CA-signed user certificates
-- Certificate validity verification
-
-</td>
-</tr>
-
-<tr>
-<td width="50%">
-
-### Digital Signing
-
-- External signature generation using `.sig` files
-- Embedded PDF signing
-- PKCS#7 PDF signature support
-- Smart signing mode selection
-- Batch signing support
-
-</td>
-<td width="50%">
-
-### Signature Verification
-
-- RSA-based signature verification
-- Embedded PDF signature detection
-- Certificate verification before trust decision
-- Revocation check before validation
-
-</td>
-</tr>
-
-<tr>
-<td width="50%">
-
-### Encryption and Decryption
-
-- AES-256-GCM file encryption
-- RSA-based AES key protection
-- Hybrid cryptography design
-- Secure encrypted output storage
-
-</td>
-<td width="50%">
-
-### Audit Logging
-
-- SQLite audit database
-- User activity history
-- Operation result tracking
-- Admin monitoring
-- CSV export support
+**Encryption & Audit**
+AES-256-GCM file encryption with RSA-protected keys, plus full SQLite audit logging.
 
 </td>
 </tr>
@@ -205,121 +64,23 @@ The application interface includes login, user dashboard, admin dashboard, signi
 
 | Category | Technology |
 |---|---|
-| Programming Language | Python |
-| GUI Framework | CustomTkinter |
-| Cryptography Library | cryptography |
-| PDF Signing | PyHanko |
-| PDF Processing | pypdf |
+| Language | Python |
+| GUI | CustomTkinter |
+| Cryptography | `cryptography`, PyHanko |
+| PDF Handling | pypdf |
 | Database | SQLite |
-| Image Handling | Pillow |
-| Document Conversion | docx2pdf |
-| Storage | Local file system |
+| Images | Pillow |
 
 ---
 
-## System Architecture
+## How It Works
 
 ```text
-User / Administrator
-        |
-        v
-Graphical User Interface
-        |
-        v
-Application Logic Layer
-        |
-        |-- Authentication System
-        |-- Key Manager
-        |-- Certificate Authority Engine
-        |-- Certificate Manager
-        |-- Signing Engine
-        |-- Verification Engine
-        |-- Encryption Engine
-        |-- Decryption Engine
-        |-- Audit Logger
-        |
-        v
-Local Secure Storage
-        |
-        |-- User Keys
-        |-- CA Certificate
-        |-- User Certificates
-        |-- Signature Files
-        |-- Encrypted Files
-        |-- Audit Database
+Document → SHA-256 Hash → Signed with RSA Private Key → Verified with Public Key + Certificate
 ```
 
----
-
-## Cryptographic Workflows
-
-### Digital Signature Workflow
-
 ```text
-Document
-   |
-   v
-Read File Content
-   |
-   v
-Generate SHA-256 Digest
-   |
-   v
-Sign Digest using RSA Private Key
-   |
-   v
-Create External Signature or Embedded PDF Signature
-   |
-   v
-Verify using Public Key and X.509 Certificate
-```
-
-### Hybrid Encryption Workflow
-
-```text
-Original File
-   |
-   v
-Generate AES-256 Key
-   |
-   v
-Encrypt File using AES-256-GCM
-   |
-   v
-Encrypt AES Key using RSA Public Key
-   |
-   v
-Store Encrypted Data, Encrypted Key and Nonce
-   |
-   v
-Decrypt AES Key using RSA Private Key
-   |
-   v
-Restore Original File
-```
-
-### Certificate Trust Workflow
-
-```text
-Root CA Private Key
-   |
-   v
-Issue User X.509 Certificate
-   |
-   v
-User Signs Document
-   |
-   v
-Verifier Checks Certificate Validity
-   |
-   v
-Verifier Checks CA Signature
-   |
-   v
-Verifier Checks Revocation Status
-   |
-   v
-Signature Trust Decision
+File → AES-256 Encrypted → AES Key Locked with RSA Public Key → Decrypted with RSA Private Key
 ```
 
 ---
@@ -328,103 +89,28 @@ Signature Trust Decision
 
 ```text
 CryptoSign/
-│
-├── core/
-│   ├── audit_logger.py
-│   ├── auth_system.py
-│   ├── auto_convert.py
-│   ├── batch_sign.py
-│   ├── ca_engine.py
-│   ├── cert_manager.py
-│   ├── cert_verifier.py
-│   ├── decrypt_engine.py
-│   ├── embed_pdf.py
-│   ├── encrypt_engine.py
-│   ├── hash_engine.py
-│   ├── history_viewer.py
-│   ├── key_manager.py
-│   ├── pkcs_sign.py
-│   ├── revocation.py
-│   ├── sign_engine.py
-│   ├── smart_sign.py
-│   └── verify_engine.py
-│
-├── gui/
-│   ├── __init__.py
-│   ├── admin_dashboard.py
-│   ├── login_dialog.py
-│   ├── main_app.py
-│   └── user_dashboard.py
-│
-├── assets/
-│   ├── login.png
-│   ├── user_dashboard.png
-│   ├── admin_dashboard.png
-│   ├── sign_document.png
-│   ├── verify_document.png
-│   └── audit_history.png
-│
-├── storage/
-│   ├── audit.db
-│   ├── ca/
-│   ├── certs/
-│   ├── encrypted/
-│   ├── keystores/
-│   ├── settings/
-│   └── signatures/
-│
-├── tests/
+├── core/        → signing, verification, encryption, certificates, audit logic
+├── gui/         → login, dashboards, main app
+├── assets/      → screenshots
+├── storage/     → keys, certs, encrypted files, audit database
 ├── main.py
-├── requirements.txt
-└── README.md
+└── requirements.txt
 ```
 
 ---
 
 ## Installation
 
-### Clone the Repository
-
 ```bash
 git clone https://github.com/amishaphuyal/Cryptosign.git
 cd Cryptosign
-```
-
-### Create a Virtual Environment
-
-```bash
 python -m venv venv
-```
-
-### Activate the Virtual Environment
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-Linux / macOS:
-
-```bash
-source venv/bin/activate
-```
-
-### Install Dependencies
-
-```bash
+venv\Scripts\activate        # Windows
+source venv/bin/activate     # Linux / macOS
 pip install -r requirements.txt
 ```
 
-If `requirements.txt` is not available, install the main dependencies manually:
-
-```bash
-pip install customtkinter cryptography pyhanko pypdf pillow docx2pdf
-```
-
----
-
-## How to Run
+## Run
 
 ```bash
 python main.py
@@ -432,142 +118,23 @@ python main.py
 
 ---
 
-## Usage Guide
+## Usage
 
-### User Workflow
+**As a User:** Register/login → generate keys → get a certificate → sign or verify documents → encrypt/decrypt files → view your history.
 
-1. Register or login as a user.
-2. Generate RSA key pair.
-3. Issue or load X.509 certificate.
-4. Select external or embedded signing mode.
-5. Sign a selected document.
-6. Verify a signed document.
-7. Encrypt or decrypt files when required.
-8. View activity history from the dashboard.
-
-### Admin Workflow
-
-1. Login as administrator.
-2. View users and system statistics.
-3. Approve or block user accounts.
-4. View audit logs.
-5. Manage certificates.
-6. Revoke users or certificates.
-7. Monitor document security activity.
+**As an Admin:** Login → manage users → view audit logs → issue or revoke certificates → monitor activity.
 
 ---
 
-## Security Controls
+## Security Highlights
 
-| Security Area | Implementation |
+| Area | Method |
 |---|---|
-| Authentication | Login and registration system |
-| Authorization | Separate user and admin dashboards |
-| Key Protection | Password-protected RSA private key support |
 | Integrity | SHA-256 hashing |
 | Non-repudiation | RSA digital signatures |
 | Confidentiality | AES-256-GCM encryption |
-| Trust Management | X.509 certificates and CA verification |
-| Revocation | Revoked user tracking |
-| Accountability | SQLite audit logging |
-| Monitoring | Admin dashboard and activity logs |
-
----
-
-## Core Modules
-
-| Module | Purpose |
-|---|---|
-| `auth_system.py` | Handles user authentication, registration and account status |
-| `key_manager.py` | Generates and loads RSA key pairs |
-| `ca_engine.py` | Creates the root certificate authority |
-| `cert_manager.py` | Issues X.509 certificates for users |
-| `cert_verifier.py` | Verifies certificate validity and CA trust |
-| `sign_engine.py` | Creates RSA external signatures |
-| `pkcs_sign.py` | Performs embedded PDF signing |
-| `smart_sign.py` | Selects the correct signing method |
-| `verify_engine.py` | Verifies external and embedded signatures |
-| `encrypt_engine.py` | Encrypts files using hybrid encryption |
-| `decrypt_engine.py` | Decrypts encrypted files |
-| `audit_logger.py` | Stores audit records in SQLite |
-| `batch_sign.py` | Signs multiple documents in a folder |
-| `revocation.py` | Handles revoked users |
-| `hash_engine.py` | Generates SHA-256 hashes |
-| `history_viewer.py` | Displays user audit history |
-
----
-
-## Supported Operations
-
-| Operation | Description |
-|---|---|
-| Setup User | Generates keys and certificate |
-| Sign File | Digitally signs selected file |
-| Verify File | Validates signature and certificate |
-| Batch Sign | Signs multiple documents |
-| Encrypt File | Encrypts files using AES and RSA |
-| Decrypt File | Restores encrypted files |
-| File Hash | Generates SHA-256 file hash |
-| Revoke User | Blocks revoked users from signing |
-| Audit History | Displays user activity history |
-
----
-
-## Audit Logging
-
-CryptoSign records important security events and document operations in an SQLite database.
-
-| Field | Description |
-|---|---|
-| Timestamp | Date and time of activity |
-| Username | User who performed the action |
-| Action | Operation such as SIGN, VERIFY, ENCRYPT or DECRYPT |
-| File Name | Target file name |
-| File Hash | SHA-256 hash when available |
-| Result | SUCCESS, FAILED, VALID or INVALID |
-| Details | Additional operation information |
-
----
-
-## Example Audit Records
-
-| Timestamp | Username | Action | File | Result |
-|---|---|---|---|---|
-| 2026-07-01 10:30:21 | amisha | SIGN | report.pdf | SUCCESS |
-| 2026-07-01 10:35:10 | amisha | VERIFY | report_signed.pdf | VALID |
-| 2026-07-01 10:40:44 | admin | ADMIN_APPROVE | user1 | SUCCESS |
-
----
-
-## Future Enhancements
-
-- Multi-factor authentication
-- Cloud-based certificate repository
-- OCSP or CRL-based certificate validation
-- Visual PDF signature placement
-- Email notification for certificate approval
-- Secure backup and restore feature
-- Windows installer package
-- Role-based permission policies
-- Improved Office document conversion support
-- Centralized certificate lifecycle management
-
----
-
-## Learning Outcomes
-
-This project demonstrates practical understanding of:
-
-- Public Key Infrastructure
-- RSA digital signatures
-- AES-GCM encryption
-- X.509 certificate issuing and validation
-- Certificate authority implementation
-- Secure key management
-- Document integrity verification
-- Revocation handling
-- Audit logging and accountability
-- GUI-based security application development
+| Trust | X.509 certificates + CA verification |
+| Accountability | SQLite audit logs |
 
 ---
 
@@ -575,31 +142,16 @@ This project demonstrates practical understanding of:
 
 <div align="center">
 
-<b>Amisha Phuyal</b>
-
-BSc (Hons) Ethical Hacking and Cybersecurity  
-Softwarica College of IT and E-Commerce  
-Coventry University
-
-<br><br>
-
-<img src="https://img.shields.io/badge/Cybersecurity-Student-6366F1?style=for-the-badge" alt="Cybersecurity Student">
-<img src="https://img.shields.io/badge/Project-CryptoSign-10B981?style=for-the-badge" alt="CryptoSign">
+**Amisha Phuyal**
+BSc (Hons) Ethical Hacking and Cybersecurity
+Softwarica College of IT and E-Commerce, Coventry University
 
 </div>
-
----
-
-## License
-
-This project is developed for academic and learning purposes.
 
 ---
 
 <div align="center">
 
 ### CryptoSign — Secure. Trusted. Verifiable.
-
-<b>Digital Signature and Certificate Management Platform</b>
 
 </div>
