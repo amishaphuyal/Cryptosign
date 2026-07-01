@@ -1,98 +1,126 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/lock.svg" width="75" height="75" alt="CryptoSign Logo">
+<!-- ================= HEADER ================= -->
+
+<img src="https://img.shields.io/badge/CryptoSign-Secure%20Digital%20Signature%20Platform-6366F1?style=for-the-badge" alt="CryptoSign">
+
+<br><br>
+
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" rx="28" fill="#0F172A"/>
+  <rect x="30" y="49" width="60" height="44" rx="10" fill="#6366F1"/>
+  <path d="M40 49V39C40 27.9543 48.9543 19 60 19C71.0457 19 80 27.9543 80 39V49" stroke="#A5B4FC" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="60" cy="69" r="6" fill="white"/>
+  <path d="M60 75V84" stroke="white" stroke-width="5" stroke-linecap="round"/>
+</svg>
 
 # CryptoSign
 
 ### Secure Digital Signature, Certificate Authority and Document Protection Platform
 
-<img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
-<img src="https://img.shields.io/badge/GUI-CustomTkinter-6366F1?style=for-the-badge" alt="CustomTkinter">
-<img src="https://img.shields.io/badge/Cryptography-RSA--2048%20%7C%20AES--256--GCM-red?style=for-the-badge" alt="Cryptography">
-<img src="https://img.shields.io/badge/Certificate-X.509-10B981?style=for-the-badge" alt="X.509">
-<img src="https://img.shields.io/badge/Database-SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
+<br>
+
+<img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
+<img src="https://img.shields.io/badge/GUI-CustomTkinter-6366F1?style=flat-square" alt="CustomTkinter">
+<img src="https://img.shields.io/badge/RSA-2048-EF4444?style=flat-square" alt="RSA">
+<img src="https://img.shields.io/badge/AES-256--GCM-10B981?style=flat-square" alt="AES">
+<img src="https://img.shields.io/badge/Certificate-X.509-F59E0B?style=flat-square" alt="X.509">
+<img src="https://img.shields.io/badge/Database-SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
 
 <br><br>
 
-<b>CryptoSign is a desktop-based digital signature and certificate management system developed in Python.</b>
+<b>A Python desktop application for secure document signing, certificate management, encryption, verification and audit logging.</b>
 
 </div>
 
 ---
 
-## Overview
+## Table of Contents
 
-CryptoSign is a secure document signing platform that allows users to generate RSA key pairs, issue X.509 certificates, sign documents, verify signatures, encrypt files, decrypt files, revoke users and maintain audit logs.
-
-The project demonstrates the practical use of Public Key Infrastructure, digital signatures, certificate authority, hybrid encryption and audit logging in a graphical desktop application.
+- [Overview](#overview)
+- [Application Preview](#application-preview)
+- [Key Features](#key-features)
+- [Technology Stack](#technology-stack)
+- [System Architecture](#system-architecture)
+- [Cryptographic Workflows](#cryptographic-workflows)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [How to Run](#how-to-run)
+- [Usage Guide](#usage-guide)
+- [Security Controls](#security-controls)
+- [Core Modules](#core-modules)
+- [Supported Operations](#supported-operations)
+- [Future Enhancements](#future-enhancements)
+- [Author](#author)
 
 ---
 
-## Screenshots
+## Overview
 
-Create a folder named `screenshots` in the project root and add your screenshots using the exact file names below.
+CryptoSign is a secure desktop-based document signing and certificate management system developed using Python. The application allows users to generate RSA key pairs, issue X.509 certificates, digitally sign documents, verify signatures, encrypt and decrypt files, revoke users and maintain full audit logs of cryptographic operations.
 
-```text
-CryptoSign/
-│
-├── screenshots/
-│   ├── login.png
-│   ├── user_dashboard.png
-│   ├── admin_dashboard.png
-│   ├── sign_file.png
-│   ├── verify_file.png
-│   ├── encrypt_file.png
-│   ├── audit_history.png
-│   └── certificate_management.png
-```
+This project demonstrates practical implementation of Public Key Infrastructure, digital signatures, certificate authority, hybrid encryption, audit logging and secure document workflow management through a graphical user interface.
 
-### Login Screen
+---
 
-<p align="center">
-  <img src="screenshots/login.png" width="850" alt="Login Screen">
-</p>
+## Application Preview
+
+The application interface includes login, user dashboard, admin dashboard, signing, verification, encryption and audit history screens.
+
+<table>
+<tr>
+<td width="50%" align="center">
+
+### Login Interface
+
+<img src="assets/login.png" width="100%" alt="Login Interface">
+
+</td>
+<td width="50%" align="center">
 
 ### User Dashboard
 
-<p align="center">
-  <img src="screenshots/user_dashboard.png" width="850" alt="User Dashboard">
-</p>
+<img src="assets/user_dashboard.png" width="100%" alt="User Dashboard">
+
+</td>
+</tr>
+
+<tr>
+<td width="50%" align="center">
 
 ### Admin Dashboard
 
-<p align="center">
-  <img src="screenshots/admin_dashboard.png" width="850" alt="Admin Dashboard">
-</p>
+<img src="assets/admin_dashboard.png" width="100%" alt="Admin Dashboard">
 
-### Sign File
+</td>
+<td width="50%" align="center">
 
-<p align="center">
-  <img src="screenshots/sign_file.png" width="850" alt="Sign File">
-</p>
+### Sign Document
 
-### Verify File
+<img src="assets/sign_document.png" width="100%" alt="Sign Document">
 
-<p align="center">
-  <img src="screenshots/verify_file.png" width="850" alt="Verify File">
-</p>
+</td>
+</tr>
 
-### Encrypt File
+<tr>
+<td width="50%" align="center">
 
-<p align="center">
-  <img src="screenshots/encrypt_file.png" width="850" alt="Encrypt File">
-</p>
+### Verify Document
+
+<img src="assets/verify_document.png" width="100%" alt="Verify Document">
+
+</td>
+<td width="50%" align="center">
 
 ### Audit History
 
-<p align="center">
-  <img src="screenshots/audit_history.png" width="850" alt="Audit History">
-</p>
+<img src="assets/audit_history.png" width="100%" alt="Audit History">
 
-### Certificate Management
+</td>
+</tr>
+</table>
 
-<p align="center">
-  <img src="screenshots/certificate_management.png" width="850" alt="Certificate Management">
-</p>
+> Screenshot images should be placed inside the `assets/` folder using the same names shown above.
 
 ---
 
@@ -104,10 +132,10 @@ CryptoSign/
 
 ### Key Management
 
-- RSA-2048 key pair generation
-- Public and private key storage
+- RSA-2048 public/private key generation
 - Password-protected private key support
-- Secure local keystore
+- Secure local key storage
+- Public key loading for verification and encryption
 
 </td>
 <td width="50%">
@@ -116,8 +144,8 @@ CryptoSign/
 
 - Root Certificate Authority generation
 - X.509 certificate issuing
-- Certificate validation
-- CA-based trust verification
+- CA-signed user certificates
+- Certificate validity verification
 
 </td>
 </tr>
@@ -125,22 +153,23 @@ CryptoSign/
 <tr>
 <td width="50%">
 
-### Digital Signature
+### Digital Signing
 
-- External `.sig` signature generation
+- External signature generation using `.sig` files
 - Embedded PDF signing
-- PKCS#7 PDF signing support
-- Batch document signing
+- PKCS#7 PDF signature support
+- Smart signing mode selection
+- Batch signing support
 
 </td>
 <td width="50%">
 
 ### Signature Verification
 
-- RSA signature verification
-- Certificate validity checking
-- Revocation checking
-- Embedded signature detection
+- RSA-based signature verification
+- Embedded PDF signature detection
+- Certificate verification before trust decision
+- Revocation check before validation
 
 </td>
 </tr>
@@ -152,17 +181,18 @@ CryptoSign/
 
 - AES-256-GCM file encryption
 - RSA-based AES key protection
-- Hybrid encryption method
-- Secure encrypted output handling
+- Hybrid cryptography design
+- Secure encrypted output storage
 
 </td>
 <td width="50%">
 
 ### Audit Logging
 
-- SQLite-based audit database
+- SQLite audit database
 - User activity history
-- Operation statistics
+- Operation result tracking
+- Admin monitoring
 - CSV export support
 
 </td>
@@ -177,49 +207,53 @@ CryptoSign/
 |---|---|
 | Programming Language | Python |
 | GUI Framework | CustomTkinter |
-| Cryptography | cryptography |
+| Cryptography Library | cryptography |
 | PDF Signing | PyHanko |
 | PDF Processing | pypdf |
 | Database | SQLite |
 | Image Handling | Pillow |
 | Document Conversion | docx2pdf |
-| Storage | Local File System |
+| Storage | Local file system |
 
 ---
 
 ## System Architecture
 
 ```text
-User / Admin
-    |
-    v
+User / Administrator
+        |
+        v
 Graphical User Interface
-    |
-    v
+        |
+        v
 Application Logic Layer
-    |
-    |-- Authentication System
-    |-- Key Manager
-    |-- Certificate Manager
-    |-- Signing Engine
-    |-- Verification Engine
-    |-- Encryption Engine
-    |-- Decryption Engine
-    |-- Audit Logger
-    |
-    v
+        |
+        |-- Authentication System
+        |-- Key Manager
+        |-- Certificate Authority Engine
+        |-- Certificate Manager
+        |-- Signing Engine
+        |-- Verification Engine
+        |-- Encryption Engine
+        |-- Decryption Engine
+        |-- Audit Logger
+        |
+        v
 Local Secure Storage
-    |
-    |-- Keys
-    |-- Certificates
-    |-- Signatures
-    |-- Encrypted Files
-    |-- Audit Database
+        |
+        |-- User Keys
+        |-- CA Certificate
+        |-- User Certificates
+        |-- Signature Files
+        |-- Encrypted Files
+        |-- Audit Database
 ```
 
 ---
 
-## Digital Signature Workflow
+## Cryptographic Workflows
+
+### Digital Signature Workflow
 
 ```text
 Document
@@ -228,21 +262,19 @@ Document
 Read File Content
    |
    v
-Generate SHA-256 Hash
+Generate SHA-256 Digest
    |
    v
-Sign with RSA Private Key
+Sign Digest using RSA Private Key
    |
    v
-Create Signature File or Embedded PDF Signature
+Create External Signature or Embedded PDF Signature
    |
    v
-Verify with Public Key and Certificate
+Verify using Public Key and X.509 Certificate
 ```
 
----
-
-## Hybrid Encryption Workflow
+### Hybrid Encryption Workflow
 
 ```text
 Original File
@@ -257,13 +289,37 @@ Encrypt File using AES-256-GCM
 Encrypt AES Key using RSA Public Key
    |
    v
-Store Encrypted File, Encrypted Key and Nonce
+Store Encrypted Data, Encrypted Key and Nonce
    |
    v
 Decrypt AES Key using RSA Private Key
    |
    v
 Restore Original File
+```
+
+### Certificate Trust Workflow
+
+```text
+Root CA Private Key
+   |
+   v
+Issue User X.509 Certificate
+   |
+   v
+User Signs Document
+   |
+   v
+Verifier Checks Certificate Validity
+   |
+   v
+Verifier Checks CA Signature
+   |
+   v
+Verifier Checks Revocation Status
+   |
+   v
+Signature Trust Decision
 ```
 
 ---
@@ -300,15 +356,13 @@ CryptoSign/
 │   ├── main_app.py
 │   └── user_dashboard.py
 │
-├── screenshots/
+├── assets/
 │   ├── login.png
 │   ├── user_dashboard.png
 │   ├── admin_dashboard.png
-│   ├── sign_file.png
-│   ├── verify_file.png
-│   ├── encrypt_file.png
-│   ├── audit_history.png
-│   └── certificate_management.png
+│   ├── sign_document.png
+│   ├── verify_document.png
+│   └── audit_history.png
 │
 ├── storage/
 │   ├── audit.db
@@ -336,13 +390,13 @@ git clone https://github.com/amishaphuyal/Cryptosign.git
 cd Cryptosign
 ```
 
-### Create Virtual Environment
+### Create a Virtual Environment
 
 ```bash
 python -m venv venv
 ```
 
-### Activate Virtual Environment
+### Activate the Virtual Environment
 
 Windows:
 
@@ -362,7 +416,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-If `requirements.txt` is not available:
+If `requirements.txt` is not available, install the main dependencies manually:
 
 ```bash
 pip install customtkinter cryptography pyhanko pypdf pillow docx2pdf
@@ -370,7 +424,7 @@ pip install customtkinter cryptography pyhanko pypdf pillow docx2pdf
 
 ---
 
-## Run the Application
+## How to Run
 
 ```bash
 python main.py
@@ -378,28 +432,28 @@ python main.py
 
 ---
 
-## Usage
+## Usage Guide
 
 ### User Workflow
 
 1. Register or login as a user.
 2. Generate RSA key pair.
 3. Issue or load X.509 certificate.
-4. Select signing mode.
-5. Sign a file using external or embedded signing.
-6. Verify signed documents.
-7. Encrypt or decrypt files.
-8. View activity history.
+4. Select external or embedded signing mode.
+5. Sign a selected document.
+6. Verify a signed document.
+7. Encrypt or decrypt files when required.
+8. View activity history from the dashboard.
 
 ### Admin Workflow
 
 1. Login as administrator.
-2. View system statistics.
-3. Approve, block or manage users.
+2. View users and system statistics.
+3. Approve or block user accounts.
 4. View audit logs.
 5. Manage certificates.
 6. Revoke users or certificates.
-7. Monitor system activity.
+7. Monitor document security activity.
 
 ---
 
@@ -409,14 +463,14 @@ python main.py
 |---|---|
 | Authentication | Login and registration system |
 | Authorization | Separate user and admin dashboards |
-| Key Protection | Password-protected RSA private keys |
+| Key Protection | Password-protected RSA private key support |
 | Integrity | SHA-256 hashing |
 | Non-repudiation | RSA digital signatures |
 | Confidentiality | AES-256-GCM encryption |
 | Trust Management | X.509 certificates and CA verification |
-| Revocation | Revoked user list |
+| Revocation | Revoked user tracking |
 | Accountability | SQLite audit logging |
-| Monitoring | Admin dashboard and activity tracking |
+| Monitoring | Admin dashboard and activity logs |
 
 ---
 
@@ -424,21 +478,22 @@ python main.py
 
 | Module | Purpose |
 |---|---|
-| `auth_system.py` | Handles user authentication and account status |
+| `auth_system.py` | Handles user authentication, registration and account status |
 | `key_manager.py` | Generates and loads RSA key pairs |
-| `ca_engine.py` | Creates root certificate authority |
-| `cert_manager.py` | Issues X.509 certificates |
-| `cert_verifier.py` | Verifies certificate validity |
-| `sign_engine.py` | Creates external RSA signatures |
-| `verify_engine.py` | Verifies signed documents |
+| `ca_engine.py` | Creates the root certificate authority |
+| `cert_manager.py` | Issues X.509 certificates for users |
+| `cert_verifier.py` | Verifies certificate validity and CA trust |
+| `sign_engine.py` | Creates RSA external signatures |
 | `pkcs_sign.py` | Performs embedded PDF signing |
-| `smart_sign.py` | Selects correct signing method |
+| `smart_sign.py` | Selects the correct signing method |
+| `verify_engine.py` | Verifies external and embedded signatures |
 | `encrypt_engine.py` | Encrypts files using hybrid encryption |
 | `decrypt_engine.py` | Decrypts encrypted files |
-| `audit_logger.py` | Stores operation logs in SQLite |
-| `batch_sign.py` | Signs multiple documents |
+| `audit_logger.py` | Stores audit records in SQLite |
+| `batch_sign.py` | Signs multiple documents in a folder |
 | `revocation.py` | Handles revoked users |
-| `hash_engine.py` | Generates SHA-256 file hashes |
+| `hash_engine.py` | Generates SHA-256 hashes |
+| `history_viewer.py` | Displays user audit history |
 
 ---
 
@@ -448,44 +503,71 @@ python main.py
 |---|---|
 | Setup User | Generates keys and certificate |
 | Sign File | Digitally signs selected file |
-| Verify File | Checks signature and certificate |
-| Batch Sign | Signs multiple files from folder |
-| Encrypt File | Encrypts file using AES and RSA |
-| Decrypt File | Restores encrypted file |
-| File Hash | Generates SHA-256 hash |
-| Revoke User | Blocks signing for revoked user |
-| Audit History | Shows logged user activities |
+| Verify File | Validates signature and certificate |
+| Batch Sign | Signs multiple documents |
+| Encrypt File | Encrypts files using AES and RSA |
+| Decrypt File | Restores encrypted files |
+| File Hash | Generates SHA-256 file hash |
+| Revoke User | Blocks revoked users from signing |
+| Audit History | Displays user activity history |
 
 ---
 
 ## Audit Logging
 
-CryptoSign records all major security activities.
+CryptoSign records important security events and document operations in an SQLite database.
 
 | Field | Description |
 |---|---|
 | Timestamp | Date and time of activity |
 | Username | User who performed the action |
-| Action | SIGN, VERIFY, ENCRYPT, DECRYPT, HASH |
-| File Name | Target document |
-| File Hash | SHA-256 hash if available |
-| Result | SUCCESS, FAILED, VALID, INVALID |
-| Details | Additional operation details |
+| Action | Operation such as SIGN, VERIFY, ENCRYPT or DECRYPT |
+| File Name | Target file name |
+| File Hash | SHA-256 hash when available |
+| Result | SUCCESS, FAILED, VALID or INVALID |
+| Details | Additional operation information |
+
+---
+
+## Example Audit Records
+
+| Timestamp | Username | Action | File | Result |
+|---|---|---|---|---|
+| 2026-07-01 10:30:21 | amisha | SIGN | report.pdf | SUCCESS |
+| 2026-07-01 10:35:10 | amisha | VERIFY | report_signed.pdf | VALID |
+| 2026-07-01 10:40:44 | admin | ADMIN_APPROVE | user1 | SUCCESS |
 
 ---
 
 ## Future Enhancements
 
 - Multi-factor authentication
-- Cloud certificate repository
+- Cloud-based certificate repository
 - OCSP or CRL-based certificate validation
 - Visual PDF signature placement
 - Email notification for certificate approval
-- Secure backup and restore system
+- Secure backup and restore feature
 - Windows installer package
-- Role-based access control policies
-- Improved Office document conversion
+- Role-based permission policies
+- Improved Office document conversion support
 - Centralized certificate lifecycle management
+
+---
+
+## Learning Outcomes
+
+This project demonstrates practical understanding of:
+
+- Public Key Infrastructure
+- RSA digital signatures
+- AES-GCM encryption
+- X.509 certificate issuing and validation
+- Certificate authority implementation
+- Secure key management
+- Document integrity verification
+- Revocation handling
+- Audit logging and accountability
+- GUI-based security application development
 
 ---
 
